@@ -1,0 +1,97 @@
+Company,Fab Name,Location / Address,Latitude,Longitude,Node / Process (nm),Wafer size,,,
+TMSC,Fab 12A (GIGAFAB),"8, Li-Hsin Rd. 6, Hsinchu Science Park, Hsinchu 300-096, Taiwan, R.O.C.",24.765631,120.979973,"7, 16,  28, 40, 65, 90,130 (across GAGAFAB)",300,,,
+TMSC,Fab 12B (GIGAFAB),"168, Park Ave. 2, Hsinchu Science Park, Hsinchu 300-091, Taiwan, R.O.C.",24.828055781301863,121.01239162291456,"7, 16,  28, 40, 65, 90,130 (across GAGAFAB)",300,,,
+TMSC,Global R&D Center,"168, Kehuan Rd., Hsinchu Science Park, Hsinchu 308-001, Taiwan, R.O.C.",24.763040,121.009014,,300,,,
+TMSC,Fab 14 (GIGAFAB),"1-1, Nan-Ke North Rd., Southern Taiwan Science Park, Tainan 741-014, Taiwan, R.O.C.",23.109892,120.304855,"7, 16,  28, 40, 65, 90,130 (across GAGAFAB)",300,,,
+TMSC,Fab 15 (GIGAFAB),"1, Keya Rd. 6, Central Taiwan Science Park, Taichung 428-303, Taiwan, R.O.C.",24.214538,120.617628,"7, 16,  28, 40, 65, 90,130 (across GAGAFAB)",300,,,
+TSMC Nanjing Company Ltd,Fab 16 ,"16, Zifeng Road, Pukou Economic Development Zone, Nanjing, Jiangsu Province, China",31.032516,121.460022,"28 / 22, 16 / 12",300,,,
+TMSC,Fab 18 (GIGAFAB),"8, Beiyuan Rd. 2, Southern Taiwan Science Park, Tainan 745-093, Taiwan, R.O.C.",23.116720,120.264328,"3 (main 3nm facility)
+5 (main 5nm faciilty)",300,,,
+TMSC,Fab 20,"1, Kehuan Rd., Hsinchu Science Park, Hsinchu 308-001, Taiwan, R.O.C. ",24.764196,121.010975,2,300,,,
+TMSC,Fab 21,"5088 W. Innovation Circle, Phoenix, AZ 85083, U.S.A.",33.775979,-112.160488,"P1 4
+P2 3, P3 2 (planned)",300,,,
+TSMC,Fab 22,"1, Yuanqu N. Rd., Nanzi Dist., Kaohsiung City 811, Taiwan, R.O.C. ",22.725112,120.324668,2 (main  2nm facility),,,,
+"Japan Advanced Semiconductor Manufacturing, Inc.  (TSMC / JASM)",Fab 23,"4106-1 Haramizu, Kikuyo-machi, Kikuchi-gun, Kumamoto 869-1102, Japan",32.885706519090846,130.84572287768682,"16 / 12, 28 / 22",300,,,
+TMSC / ESMC,ESMC,"Robert-Bosch-Ring 1
+01109 Dresden
+Germany",51.128308,13.740127,"16 / 12, 28 / 22",300,,,
+TMSC,Fab 3,"9, Creation Rd. 1, Hsinchu Science Park, Hsinchu 300-092, Taiwan, R.O.C.",24.787413,121.010728,"500, 350, 250 ",200,,,
+TMSC,Fab 5,"121, Park Ave. 3, Hsinchu Science Park, Hsinchu 300-096, Taiwan, R.O.C.",,,"350, 250, 180 ",200,,,
+TMSC,Fab 6,"1, Nan-Ke North Rd., Southern Taiwan Science Park, Tainan 741-014, Taiwan, R.O.C.",23.109891,120.304855,180 ?,200,,,
+TMSC,Fab 8,"25, Li-Hsin Rd., Hsinchu Science Park, Hsinchu 300-094, Taiwan, R.O.C.",24.766856,120.976566,,200,,,
+TSMC China Company Ltd,Fab 10,"4000, Wen Xiang Road, Songjiang, Shanghai, China",31.088858,121.338173,,200,,,
+"TSMC Washington, LLC",Fab 11,"5509 N.W. Parker Street, Camas, WA 98607",45.612606,-122.453413,"350, 300, 250, 220, 180, 160",200,,,
+TMSC,Fab 2,"121, Park Ave. 3, Hsinchu Science Park, Hsinchu 300-096, Taiwan, R.O.C.",24.822702789385488,120.99007390780129,"800, 600, 500",150,,,
+Intel,Fab 12,"Octillio Campus, 4500 S Dobson Rd
+Chandler, AZ  85248
+United States",33.241512,-111.882407,"10, 14, 22",300,,,
+Intel,Fab 22,"Octillio Campus, 4500 S Dobson Rd
+Chandler, AZ  85248
+United States",33.241513,-111.882406,"10, 14, 22",300,,,
+Intel,Fab 32,"Octillio Campus, 4500 S Dobson Rd
+Chandler, AZ  85248
+United States",33.241514,-111.882405,"10, 14, 22",300,,,
+Intel,Fab 42,"Octillio Campus, 4500 S Dobson Rd
+Chandler, AZ  85248
+United States",33.241515,-111.882404,"5, 10",300,,,
+Intel,Fab 52,"Octillio Campus, 4500 S Dobson Rd
+Chandler, AZ  85248
+United States",33.241516,-111.882403,"18A, 2 (aka 20A)",300,,,
+Intel,Fab 62,"Octillio Campus, 4500 S Dobson Rd
+Chandler, AZ  85248
+United States",33.241517,-111.882402,"18A, 2 (aka 20A)",300,,,
+Intel,D1X (and others),"Ronler Acres, 2501 NE Century Blvd
+Hillsboro, OR  97124",45.544787,-122.911168,Pilot / early production fab (currently 18A),300,,,
+Intel,Fab 24,"Collinstown Industrial Park
+Leixlip Co. Kildare
+W23 CX68
+Ireland",53.374153,-6.521330,14,,,,
+Intel,Fab 34,"Collinstown Industrial Park
+Leixlip Co. Kildare
+W23 CX68
+Ireland",53.374154,-6.521329,"Intel 4
+Intel 3 proj 2025",300,,,
+Intel,Fab 28,"Avatz Avenue 2
+Kiryat Gat
+Israel",31.615826,34.771646,"Intel 7, 10",300,,,
+Intel,Fab 38,"Avatz Avenue 2
+Kiryat Gat
+Israel",31.615827,34.771647,"?? (3, 5 in some reports)",,,,
+Intel,Ohio One / Fab 27,"Johnstown, OH  43031
+United States",40.147706,-82.689014,?? (14A in some reports),300,,,
+Intel,Fab 9,"1600 Rio Rancho Blvd SE
+Rio Rancho, NM 87124",35.234039,-106.657722,Packaging,300,,,
+Intel,Fab 11x,"1600 Rio Rancho Blvd SE
+Rio Rancho, NM 87124",35.234040,-106.657721,"Packaging (formerly 45, 32, 22,14)",300,,,
+Intel,,"Magdeburg, Germany",52.131672,11.640320,18A,,,,
+Samsung,S3,"1, Samsungjeonja-ro, Hwaseong-si, Gyeonggi-do 18448, Korea",43.990514,22.934675,3 to 10,300,,,
+Samsung,"V1 
+* this may be an older name for a line which is now just considered a part of S3","1, Samsungjeonja-ro, Hwaseong-si, Gyeonggi-do 18448, Korea",43.990515,22.934676,7,300,,,
+Samsung,S5 / S6,"Godeok-myeon, Pyeongtaek-si, Gyeonggi-do, South Korea",37.041119,127.028877,"4, 5, 7
+A14 planned",300,,,
+Samsung,“Taylor”,"1530 FM-973
+Taylor, TX 76574",30.534284,-97.446261,"2, 4",300,,,
+Samsung,6 Line,"1, Samsung-ro, Giheung-gu, Yongin-si, Gyeonggi-do 17113, Korea",37.228062,127.071259,"70, 90, 130, 180, up to 350",200,,,
+Samsung,S1,"1, Samsung-ro, Giheung-gu, Yongin-si, Gyeonggi-do 17113, Korea",37.228063,127.071260,"8, 14, 28",300,,,
+Samsung,S2,"12100 Samsung Blvd, Austin, TX 78754",30.371401,-97.634758,11 to 65,300,,,
+SMIC North China,"BJ300 P1
+(Mega Fab B1)
+(Fab 4, Fab 6)","No.18 Wenchang Avenue, Economic Technological Development Area, Beijing, China",39.795341,116.506638,"28, 40, 65",300,,,
+SMIC North China (majority owned),"BJ300 P2
+(Fab B2 / B3)","No.18 Wenchang Avenue, Economic Technological Development Area, Beijing, China",39.795342,116.506639,"14, 28",300,,,
+SMIC Jingcheng,“Jingcheng”,Beijing’s Economic-Technological Development Area,39.8616996479574,116.43623427382992,28 +,300,,,
+SMIC,"SH200
+(Mega Fab S1) ","No.18 Zhangjiang Road, Pudong New Area, Shanghai ,China",31.218267,121.608727,"28, 55, 65, 250",200,,,
+SMIC South (SN1),"SH300
+(Fab S2, Fab 8)
+(Fab SN1)","No.18 Zhangjiang Road, Pudong New Area, Shanghai ,China",31.218267,121.608727,"28, 55, 65, 250",300,,,
+SMIC,“Lingang”,"Shuyuan Town, Lingang New Area",25.153364,121.396370,14 and below,300,,,
+SMIC,"SZ200
+(Fab 15)","No.18 Gaoxin Road, Laokeng Community, Longtian Subdistrict, Pingshan District, Shenzhen, China",22.746223072864886,114.24987007059025,350,200,,,
+SMIC,"Shezhen
+(Fab 16)","No.18 Gaoxin Road, Laokeng Community, Longtian Subdistrict, Pingshan District, Shenzhen, China",22.7462230728650,114.24987007060,28 + ,300,,,
+SMIC,"TJ200
+(Fab 7)","No.19 Xinghua Avenue, Xiqing Economic Development Area, Tianjin, China",39.017616814466024,117.21722145223009,180,200,,,
+SMIC,“Xiqing”,"No.19 Xinghua Avenue, Xiqing Economic Development Area, Tianjin, China",39.017616814467,117.21722145224,28 - 180,300,,,
+Rapidus,IIM-1,"Bibi, Chitose City, Hokkaido 066-0012, Japan",42.823134,141.650429,2,300,,,
+GlobalFoundries,Fab 8,"400 Stonebreak Road Ext, Malta, NY 12020",42.970350,-73.756473,"12, 14, 22, 28",300,,,
