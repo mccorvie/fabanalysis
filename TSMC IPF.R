@@ -13,12 +13,10 @@ ipf <- \( MM, row_target, col_target)
     
     col_marginal <- ifelse( col_target>0, apply( MM, 2, sum ), 1 )
     MM <- t( t( MM) * col_target / col_marginal )
-    cat( passes, " ", sum( abs( MM_old-MM)), "\n")
   }
   MM
 }
 
-tsmc_revenue <- read_csv( "tsmc revenue breakdown.csv")
 
 
 asml_revenue <- read_csv( "asml revenue breakdown.csv") |> 
@@ -88,7 +86,7 @@ EUV_rev  <- as_tibble( t( fine_attribution[ "EUV",,] )) |>
   mutate( Date = date_names, idx = 1:n(), `Product line` = "EUV" ) |> 
   pivot_longer( `China`:`EMEA`,names_to="Region", values_to = "%")
   
-ggplot( EUV_rev, aes( x=idx, y=`%`,fill=Region)) +geom_col() + scale_fill_brewer(palette= "Set2")
+ggplot( EUV_rev, aes( x=idx, y=`%`,fill=Region)) +geom_col() + scale_fill_brewer(palette= "Set3")
 
 
 EUV_units <- EUV_rev |> 
@@ -99,7 +97,7 @@ EUV_units <- EUV_rev |>
   mutate( `Cum Units` = cumsum( Units )) |> 
   ungroup()
 
-ggplot( EUV_units, aes( x=idx, y=`Cum Units`,color=Region)) +geom_line() + geom_point()+ scale_fill_brewer(palette= "Set2")
+ggplot( EUV_units, aes( x=idx, y=`Cum Units`,color=Region)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set3")
 
 #1Q19 11
 #4Q19 26
@@ -114,5 +112,51 @@ EUV_units
 
 
 
+
+
+##
+## TSMC units from 
+##
+
+tsmc_revenue0 <- read_csv( "tsmc revenue breakdown.csv")
+
+
+wafer_asp <- tibble( 
+  Node = c( "3nm", "5nm", "7nm", "10nm-20nm",  "28nm","40nm-90nm", "0.1um+" ),
+  ASP  = c( 20,	16,	10,	6,	3,	2.6,	2 )
+)
+
+wafer_asp
+
+price_factor <- tibble( 
+  Date = pull( tsmc_revenue, "Date"),
+  Factor = c( 0.8,0.8,0.8,0.9,0.95,1,1,1,1,1,1,1,1,1,1,1,1,1,1.1 )
+)
+
+
+
+tsmc_revenue <- tsmc_revenue0 |> 
+  mutate( 
+      `10nm-20nm` = `10nm`+`16/20nm`+`16nm`+`20nm`,
+      `40nm-90nm` = `40/45nm` + `65nm` + `90nm`,
+      `0.1um+` = `0.11/0.13um`+`0.15/0.18um`+`0.25um+`
+  ) |> 
+  select( -`10nm`,-`16/20nm`,-`16nm`,-`20nm`, -`40/45nm`,-`65nm`, -`65nm`, -`90nm`, -`0.11/0.13um`,-`0.15/0.18um`,-`0.25um+`) |> 
+  mutate( across( `3nm`:`0.1um+`, \(x) x/100)) |> 
+  rename_with( \(x) paste0( x," %"), `3nm`:`0.1um+`) |> 
+  mutate( across( `3nm %`:`0.1um+ %`, \(x) x*Revenue, .names= "{.col}rev" )) |> 
+  rename_with( \(x) str_replace( x,"%rev", "rev"), `3nm %rev`:`0.1um+ %rev`)
+
+est_wafers <- tsmc_revenue |> 
+  select( Date, `3nm rev`:`0.1um+ rev`) |> 
+  rename_with( \(x) str_remove( x," rev$" ), `3nm rev`:`0.1um+ rev`) |> 
+  pivot_longer( `3nm`:`0.1um+`, names_to = "Node", values_to = "Revenue") |> 
+  left_join( price_factor, by = "Date") |> 
+  left_join( wafer_asp, by = "Node") |> 
+  mutate( wpm = Revenue / Factor / ASP / 3 ) |> 
+  mutate( idx = 1:n())
+
+
+ggplot( est_wafers, aes( x=idx, y=wpm, fill = Node) ) + geom_col() + scale_fill_brewer(palette= "Set3")
 
 
