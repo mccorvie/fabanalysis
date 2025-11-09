@@ -1,5 +1,10 @@
 library( tidyverse )
 
+
+##
+##  Iterative proportional fitting aka raking
+##   
+
 ipf <- \( MM, row_target, col_target)
 {
   eps <- 1e-9
@@ -86,30 +91,38 @@ for( date_idx in 1:nrow( asml_revenue ))
 }
 
 
-EUV_rev  <- as_tibble( t( fine_attribution[ "EUV",,] )) |> 
-  mutate( norm = rowSums( across( everything() ))) |> 
-  mutate( across( everything(), \(x) x/norm )) |> 
-  select( -norm ) |> 
-  mutate( 
-      Quarter = factor( quarter_names, levels = quarter_levels, ordered=T),
-      `Product line` = "EUV" 
-  ) |> 
-  pivot_longer( `China`:`EMEA`,names_to="Region", values_to = "%")
-  
+asml_rev_attribution <- as_tibble( as.data.frame.table( fine_attribution)) |> 
+  rename( `Product line`= Var1, Region=Var2, Quarter=Var3, `%` = Freq) |> 
+  mutate( Quarter = factor( Quarter, levels = quarter_levels, ordered=T))
+
+EUV_rev  <- asml_rev_attribution |> 
+  filter( `Product line` == "EUV" ) |> 
+  group_by( `Quarter`) |> 
+  mutate( `%` = `%` / sum( `%`)) |> 
+  ungroup()
+
+
 ggplot( EUV_rev, aes( x=Quarter, y=`%`,fill=Region)) +geom_col() + scale_fill_brewer(palette= "Set3")
 
 
-
-
-EUV_units <- EUV_rev |> 
+asml_units_attribution <- asml_rev_attribution |> 
+  group_by( `Product line`, Quarter ) |> 
+  mutate( `%` = `%` / sum( `%`)) |> 
   left_join( units_by_product, by = join_by( Quarter, `Product line`) ) |> 
   mutate( Units = Units * `%`) |> 
-  select( -`%`) |> 
-  group_by( Region ) |> 
-  mutate( `Cum Units` = cumsum( Units )) |> 
+  group_by( Region, `Product line` ) |> 
+  arrange( Quarter ) |> 
+  mutate( `Cum Units` = cumsum( Units ))  |> 
   ungroup()
 
-ggplot( EUV_units, aes( x=Quarter, y=`Cum Units`,color=Region)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set3")
+asml_units_attribution |> 
+  filter( `Product line` == "EUV") |> 
+  ggplot( aes( x=Quarter, y=`Cum Units`,color=Region)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
+
+asml_units_attribution |> 
+  filter( `Region` == "Taiwan") |> 
+  ggplot( aes( x=Quarter, y=`Cum Units`,color=`Product line`)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
+
 
 #1Q19 11
 #4Q19 26
@@ -126,58 +139,5 @@ EUV_units
 
 
 
-##
-## TSMC units from 
-##
-
-tsmc_revenue0 <- read_csv( "tsmc revenue breakdown.csv") |> 
-  mutate( across( `3nm`:`0.25um+`, \(x) x/100)) |> 
-  mutate( Quarter = factor( Quarter, quarter_levels, ordered=T))
-  
-node_levels <- c(  "3nm", "5nm", "7nm", "10nm", "16/20nm", "10nm-20nm", "20nm", "28nm", "40/45nm", "40nm-90nm", "65nm", "90nm",  "0.1um+", "0.11/0.13um", "0.15/0.18um", "0.25um+")
-
-wafer_asp <- tibble( 
-  Node = factor( c( "3nm", "5nm", "7nm", "10nm-20nm",  "28nm","40nm-90nm", "0.1um+" ), node_levels, ordered=T),
-  ASP  = c( 20,	16,	10,	6,	3,	2.6,	2 )
-)
-
-# price_factor <- tibble( 
-#   Quarter = pull( tsmc_revenue0, "Quarter"),
-#   Factor = c( 0.8,0.8,0.8,0.9,0.95,1,1,1,1,1,1,1,1,1,1,1,1,1,1.1 )
-# )
 
 
-tsmc_revenue <- tsmc_revenue0 |> 
-  mutate( 
-      `10nm-20nm` = `10nm`+`16/20nm`+`16nm`+`20nm`,
-      `40nm-90nm` = `40/45nm` + `65nm` + `90nm`,
-      `0.1um+` = `0.11/0.13um`+`0.15/0.18um`+`0.25um+`
-  ) |> 
-  select( -`10nm`,-`16/20nm`,-`16nm`,-`20nm`, -`40/45nm`,-`65nm`, -`65nm`, -`90nm`, -`0.11/0.13um`,-`0.15/0.18um`,-`0.25um+`) |> 
-  rename_with( \(x) paste0( x," %"), `3nm`:`0.1um+`) |> 
-  mutate( across( `3nm %`:`0.1um+ %`, \(x) x*Revenue, .names= "{.col}rev" )) |> 
-  rename_with( \(x) str_replace( x,"%rev", "rev"), `3nm %rev`:`0.1um+ %rev`)
-
-est_wafers <- tsmc_revenue |> 
-  select( Quarter, `3nm rev`:`0.1um+ rev`) |> 
-  rename_with( \(x) str_remove( x," rev$" ), `3nm rev`:`0.1um+ rev`) |> 
-  pivot_longer( `3nm`:`0.1um+`, names_to = "Node", values_to = "Revenue") |> 
-  mutate( Node = factor( Node, node_levels, ordered=T)) |> 
-  #left_join( price_factor, by = "Quarter") |> 
-  left_join( wafer_asp, by = "Node") |> 
-  #mutate( wpm = Revenue / Factor / ASP / 3 ) 
-  mutate( wpm = Revenue / ASP  ) 
-  
-
-pp<- filter(est_wafers, Node == "3nm" | Node == "5nm" | Node== "7nm" )
-
-ggplot( pp, aes( x=Quarter, y=wpm, fill = Node) ) + geom_col() + scale_fill_brewer(palette= "Set3")
-
-#xx <- est_wafers |> filter( Node == "3nm" | Node == "5nm" | Node== "7nm" ) |> 
-  xx <- est_wafers |> filter( Node == "3nm" ) |> 
-  group_by( Quarter) |> 
-  summarize( high_end_wpm = sum( wpm )) |> 
-  left_join( filter( EUV_units, Region == "Taiwan" ), by = "Quarter")
-
-xx
-ggplot( xx, aes( x=`Cum Units`, y= high_end_wpm)) + geom_point()
