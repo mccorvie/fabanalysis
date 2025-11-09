@@ -4,6 +4,10 @@
 scanner_specs<-read_csv( "scanner_specs.csv")
 scanner_specs
 
+analyst_estimates<-read_csv( "analyst estimates.csv")
+
+
+
 node_layers <- tibble(
   Node = c( "3nm", "5nm", "7nm" ),
   Layers = c( 22, 12, 4 )
@@ -26,8 +30,8 @@ NXE_allocation <- ASP_by_product |>
 hours_per_month = 365.25/12*24
 
 OOE = 0.85
-wpm_NXE3800 = 220 * hours_per_month / 22/1000 * OOE
-wpm_NXE3600 = 160 * hours_per_month / 12/1000 * OOE
+wpm_NXE3800 = 220 * hours_per_month / 25/1000 * OOE
+wpm_NXE3600 = 160 * hours_per_month / 14/1000 * OOE
 wpm_NXE3400 = 135 * hours_per_month / 4/1000 * OOE
 
 scanner_output <- asml_units_attribution |> 
@@ -47,6 +51,8 @@ tsmc_maybe = filter( scanner_output, Region == "Taiwan") |>
 
 
 ggplot( filter( tsmc_maybe, Node == "3nm" ), aes( x=Quarter, y=wpm) ) + geom_point( color="blue") + geom_point( aes(y=`Scanner wpm`), color="black")
+ggplot( filter( tsmc_maybe, Node == "5nm" ), aes( x=Quarter, y=wpm) ) + geom_point( color="blue") + geom_point( aes(y=`Scanner wpm`), color="black")
+ggplot( filter( tsmc_maybe, Node == "7nm" ), aes( x=Quarter, y=wpm) ) + geom_point( color="blue") + geom_point( aes(y=`Scanner wpm`), color="black")
 
 
 
