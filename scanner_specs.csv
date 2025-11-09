@@ -1,0 +1,20 @@
+Inputs,,Type,Node,Wavelength,Resolution,NA,Wafer size (mm^2),Throughput (wph) ,ASP
+EXE:5200B,[specs],EUV,<2nm,13.5nm,8nm,0.55,300,175,350
+EXE:5000,[specs],EUV,2nm,13.5nm,8nm,0.55,300,185,350
+NXE:3800E,[specs],EUV,2nm,13.5nm,13nm,0.33,300,220,230
+NXE:3600D,[report] [specs],EUV,5nm / 3nm,13.5nm,13nm,0.33,300,160,160
+NXE:3400C,[specs],EUV,7nm / 5nm,13.5nm,13nm,0.33,300,135,100
+NXT:2150i,[specs],ArFi,,193nm,38nm,1.35,300,310,75
+NXT:2100i,[specs],ArFi,,193nm,38nm,1.35,300,295,75
+NXT:2050i,[spec],ArFi,,193nm,38nm,1.35,300,295,75
+NXT:2000i,[spec],ArFi,,193nm,38nm,1.35,300,275,75
+NXT:1980Fi,[spec],ArFi,,193nm,38nm,1.35,300,330,75
+NXT:1470,[spec],ArFdry,,193nm,57nm,0.93,300,300,
+XT:1460K,[spec],ArFdry,,193nm,65nm,0.93,300,205,
+XT:1060K,[spec],KrF,,248nm,80nm,0.93,300,205,
+NXT:870B,[spec],KrF,,248nm,110nm,0.93,300,400,
+NXT:870,[spec],KrF,,248nm,110nm,0.8,300,330,
+XT:860N,[spec],KrF,,248nm,110nm,0.8,200 / 300,330,
+XT:860M,[spec],KrF,,248nm,110nm,0.8,300,240,
+XT:400M,[spec],i-line,,365nm,350nm,0.65,200 / 300,245,
+XT:260,[spec],i-line,,365nm,400nm,,?,270,
