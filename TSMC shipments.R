@@ -7,11 +7,11 @@ tsmc_revenue0 <- read_csv( "tsmc revenue breakdown.csv") |>
   mutate( across( `3nm`:`0.25um+`, \(x) x/100)) |> 
   mutate( Quarter = factor( Quarter, quarter_levels, ordered=T))
 
-node_levels <- c(  "3nm", "5nm", "7nm", "10nm", "16/20nm", "10nm-20nm", "20nm", "28nm", "40/45nm", "40nm-90nm", "65nm", "90nm",  "0.1um+", "0.11/0.13um", "0.15/0.18um", "0.25um+")
+node_levels <- c(  "3nm", "5nm", "7nm", "10nm", "16/20nm", "16nm-20nm", "20nm", "28nm", "40/45nm", "40nm-90nm", "65nm", "90nm",  "0.1um+", "0.11/0.13um", "0.15/0.18um", "0.25um+")
 
 wafer_asp <- tibble( 
-  Node = factor( c( "3nm", "5nm", "7nm", "10nm-20nm",  "28nm","40nm-90nm", "0.1um+" ), node_levels, ordered=T),
-  ASP  = c( 20,	16,	10,	6,	3,	2.6,	2 )
+  Node = factor( c( "3nm", "5nm", "7nm", "10nm", "16nm-20nm",  "28nm","40nm-90nm", "0.1um+" ), node_levels, ordered=T),
+  ASP  = c( 20,	16,	10,	6, 4,	3,	2.6,	2 )
 )
 
 ##  Semiconductor PPI 
@@ -27,11 +27,11 @@ bls_ppi <- read_csv( "BLS semi PPI.csv" ) |>
 
 tsmc_revenue <- tsmc_revenue0 |> 
   mutate( 
-    `10nm-20nm` = `10nm`+`16/20nm`+`16nm`+`20nm`,
+    `16nm-20nm` = `16/20nm`+`16nm`+`20nm`,
     `40nm-90nm` = `40/45nm` + `65nm` + `90nm`,
     `0.1um+` = `0.11/0.13um`+`0.15/0.18um`+`0.25um+`
   ) |> 
-  select( -`10nm`,-`16/20nm`,-`16nm`,-`20nm`, -`40/45nm`,-`65nm`, -`65nm`, -`90nm`, -`0.11/0.13um`,-`0.15/0.18um`,-`0.25um+`) |> 
+  select( -`16/20nm`,-`16nm`,-`20nm`, -`40/45nm`,-`65nm`, -`65nm`, -`90nm`, -`0.11/0.13um`,-`0.15/0.18um`,-`0.25um+`) |> 
   rename_with( \(x) paste0( x," %"), `3nm`:`0.1um+`) |> 
   mutate( across( `3nm %`:`0.1um+ %`, \(x) x*Revenue, .names= "{.col}rev" )) |> 
   rename_with( \(x) str_replace( x,"%rev", "rev"), `3nm %rev`:`0.1um+ %rev`)
@@ -47,10 +47,21 @@ est_wafers <- tsmc_revenue |>
   left_join( bls_ppi, by = "Quarter") |> 
   mutate( wpm = Revenue / PPI / ASP / 3 ) 
 
-
 est_wafers
 
-pp<- filter(est_wafers, Node == "3nm" | Node == "5nm" | Node== "7nm" )
+est_total <- est_wafers |> 
+  group_by( Quarter ) |> 
+  summarize( wpm_est = sum( wpm )) |> 
+  ungroup() |> 
+  left_join( select(tsmc_revenue, Quarter, `Wafer Shipments`), by="Quarter") |> 
+  mutate( wpm_act= `Wafer Shipments`/3, error = (wpm_est/wpm_act-1)*100) |> 
+  select( -`Wafer Shipments`)
+
+est_total
+
+pp<- filter(est_wafers, Node == "3nm" | Node == "5nm" | Node== "7nm" | Node == "10nm")
+
+est_wafers
 
 ggplot( pp, aes( x=Quarter, y=wpm, fill = Node) ) + geom_col() + scale_fill_brewer(palette= "Set3")
 
@@ -68,13 +79,15 @@ ggplot( xx, aes( x=`Cum Units`, y= high_end_wpm)) + geom_point()
 ##
 ##  Try to figure out ASP by regression
 ##
-
+tsmc_revenue_adj
 tsmc_revenue_adj <- tsmc_revenue |> 
   left_join( bls_ppi, by = "Quarter") |> 
   mutate( target = `Wafer Shipments` * PPI ) 
 
+tsmc_revenue_adj
+
 ll <- lm( 
-  `Wafer Shipments` ~`3nm rev` + `5nm rev` + `7nm rev` + `28nm rev` + `10nm-20nm rev` + `40nm-90nm rev` + `0.1um+ rev` ,
+  `Wafer Shipments` ~`3nm rev` + `5nm rev` + `7nm rev` + `10nm rev` +  `16nm-20nm rev` + `28nm rev` + `40nm-90nm rev` + `0.1um+ rev` ,
   tsmc_revenue_adj
 )
 
