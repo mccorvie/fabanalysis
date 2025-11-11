@@ -29,8 +29,8 @@ quarter_to_date <- \( quarters )
   ymd( paste0( YY, "-",QQ*3-1, "-", 15))
 }
 
-quarter_levels <- paste0( rep(1:4, times=10), "Q", rep(15:25, each=4) )
-
+quarter_levels <- paste0( rep(1:4, times=10), "Q", rep(10:27, each=4) )
+paste(quarter_levels, collapse=",")
 
 asml_revenue <- read_csv( "asml revenue breakdown.csv") |> 
   mutate( across( `Net Sales`:`EMEA %`, parse_number)) |> 
@@ -65,25 +65,32 @@ product_names <- str_remove( colnames( by_product ), " %$")
 quarter_names    <- pull( asml_revenue, "Quarter")
 
 
-rel_strength <- matrix( 1, nrow=ncol( by_product), ncol = ncol( by_region) )
+rel_strength0 <- matrix( 1, nrow=ncol( by_product), ncol = ncol( by_region) )
 
 
-rownames( rel_strength ) <- product_names
-colnames( rel_strength ) <- region_names
+rownames( rel_strength0 ) <- product_names
+colnames( rel_strength0 ) <- region_names
 
 # export controls
-rel_strength[ "EUV", "China"]  = 0
-rel_strength[ "ArFi", "China"] = 0.5
+rel_strength0[ "EUV", "China"]  = 0
+rel_strength0[ "ArFi", "China"] = 0.5
 # TSMC gets a lot of EUV scanners
-rel_strength[ "EUV", "Taiwan"] = 2
+rel_strength0[ "EUV", "Taiwan"] = 2
 
 
 fine_attribution <- array( NA, dim=c(  ncol( by_product), ncol( by_region ),  nrow( asml_revenue ) ))
 dimnames( fine_attribution ) <- list( product_names, region_names, quarter_names)
 
+asml_revenue$Quarter
+
+xover <- which( "1Q23"== asml_revenue$Quarter)
 
 for( date_idx in 1:nrow( asml_revenue ))
 {
+  rel_strength <- rel_strength0
+  if( date_idx >= xover )
+    rel_strength["EUV","Taiwan"]=1
+  
   region_target  <- by_region[date_idx,] |> as.numeric()
   product_target <- by_product[date_idx,] |> as.numeric()
   

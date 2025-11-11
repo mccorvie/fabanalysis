@@ -57,10 +57,10 @@ est_total <- est_wafers |>
   mutate( wpm_act= `Wafer Shipments`/3, error = (wpm_est/wpm_act-1)*100) |> 
   select( -`Wafer Shipments`)
 
-est_total
+xx<-est_total |> summarize( wpm_act=sum(wpm_act), wpm_est=sum( wpm_est))
+xx$wpm_est/xx$wpm_act
 
-pp<- filter(est_wafers, Node == "3nm" | Node == "5nm" | Node== "7nm" | Node == "10nm")
-
+#pp<- filter(est_wafers, Node == "3nm" | Node == "5nm" | Node== "7nm" | Node == "10nm") 
 est_wafers
 
 ggplot( pp, aes( x=Quarter, y=wpm, fill = Node) ) + geom_col() + scale_fill_brewer(palette= "Set3")
