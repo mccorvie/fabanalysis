@@ -65,17 +65,17 @@ product_names <- str_remove( colnames( by_product ), " %$")
 quarter_names    <- pull( asml_revenue, "Quarter")
 
 
-rel_strength0 <- matrix( 1, nrow=ncol( by_product), ncol = ncol( by_region) )
+rel_strength <- matrix( 1, nrow=ncol( by_product), ncol = ncol( by_region) )
 
 
-rownames( rel_strength0 ) <- product_names
-colnames( rel_strength0 ) <- region_names
+rownames( rel_strength ) <- product_names
+colnames( rel_strength ) <- region_names
 
 # export controls
-rel_strength0[ "EUV", "China"]  = 0
-rel_strength0[ "ArFi", "China"] = 0.5
+rel_strength[ "EUV", "China"]  = 0
+rel_strength[ "ArFi", "China"] = 0.5
 # TSMC gets a lot of EUV scanners
-rel_strength0[ "EUV", "Taiwan"] = 2
+rel_strength[ "EUV", "Taiwan"] = 2
 
 
 fine_attribution <- array( NA, dim=c(  ncol( by_product), ncol( by_region ),  nrow( asml_revenue ) ))
@@ -87,10 +87,6 @@ xover <- which( "1Q23"== asml_revenue$Quarter)
 
 for( date_idx in 1:nrow( asml_revenue ))
 {
-  rel_strength <- rel_strength0
-  if( date_idx >= xover )
-    rel_strength["EUV","Taiwan"]=1
-  
   region_target  <- by_region[date_idx,] |> as.numeric()
   product_target <- by_product[date_idx,] |> as.numeric()
   
@@ -130,17 +126,20 @@ asml_units_attribution |>
   filter( `Region` == "Taiwan") |> 
   ggplot( aes( x=Quarter, y=`Cum Units`,color=`Product line`)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
 
+asml_units_attribution
+
 
 #1Q19 11
 #4Q19 26
 #
 #3Q23 113
 #ut of 202  (113/202 = 56%)
-EUV_units |> filter( Quarter == "1Q19", Region == "Taiwan" ) |> pull( `Cum Units`)
-EUV_units |> filter( Quarter == "3Q23", Region == "Taiwan" ) |> pull( `Cum Units`)
-EUV_units |> filter( Quarter == "3Q23") |> pull( `Cum Units`) |> sum()
 
-EUV_units
+
+asml_units_attribution |> filter( Quarter == "1Q19", Region == "Taiwan", `Product line`=="EUV") |> pull( `Cum Units`)
+asml_units_attribution |> filter( Quarter == "3Q23", Region == "Taiwan", `Product line`=="EUV" ) |> pull( `Cum Units`)
+asml_units_attribution |> filter( Quarter == "3Q23", `Product line`=="EUV") |> pull( `Cum Units`) |> sum()
+
 
 
 

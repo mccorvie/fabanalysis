@@ -4,3 +4,6 @@
 .Ruserdata
 *png
 *html
+.DS_Store
+analyst estimates by fab.csv
+analyst estimates by node.csv

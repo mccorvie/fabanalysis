@@ -15,7 +15,6 @@ node_layers <- tibble(
   Layers = c( 22, 12, 4 )
 )
 
-pnorm( 2, 0,1)
 f_NXE3400 = approxfun( c(100,160,240,350), c(1,0,0,0), yleft=1, yright=0)
 f_NXE3600 = approxfun( c(100,160,240,350), c(0,1,0,0), yleft=0, yright=0)
 f_NXE3800 = approxfun( c(100,160,240,350), c(0,0,1,0), yleft=0, yright=0)
@@ -76,6 +75,9 @@ filter( tsmc_maybe, Node!= "2nm" ) |>
     geom_point( color="blue") + 
     geom_step( aes(x=Quarter,y=`Scanner wpm`, group=1), color="purple")  + 
     geom_step( aes(x=Quarter,y=`wpm_analyst`, group=1), color="darkgrey")  + 
-    facet_grid( rows=vars(Node))
+  theme(
+    axis.text.x = element_text(angle = 60, hjust = 1)  # 45° tilt
+  ) +
+facet_grid( rows=vars(Node))
 
 
