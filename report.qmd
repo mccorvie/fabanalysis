@@ -1,0 +1,79 @@
+---
+title: "TSMC Fab Capacity"
+author: "Ryan McCorvie"
+format: html
+editor: visual
+---
+
+## Overview
+
+The ultimate goal of this project is to quantify global chip fabrication capacity.  
+
+It's useful to narrow the focus to the most advanced HPC chips, for two reasons.  These are chips used in AI workloads, so understanding these chips is most important for tracking AI progress and capabilities.  Second, the manufacturing for the most advanced chips is relatively concentrated, which makes the problem more tractable.
+
+The primary goal is to quantify the production and manufacturing capacity at TSMC, the largest supplier of chips for AI workloads, at the most advanced Nodes, 7nm and below.
+
+## Chip Manufacturing
+
+
+### TSMC quarterly reports and revenue attribution
+
+### Average Sales Price (ASP) of wafers
+
+### Adjusting for broad price trends
+
+### Regression analysis
+
+### Final results
+
+
+## Supply Chain Model
+
+### Chip manufacturing inputs
+
+### ASML quarterly reports and revenue attribution
+
+### "Raking" the earnings for fine attribution
+
+### Sanity Checks
+
+
+### ASP and scanner attribution
+
+### Scanner analysis
+
+### Model Results
+
+
+## Energy and Construciton Model
+
+
+### Fab analysis
+
+### Fab Phase constuction timing
+
+### Fab Power Analysis
+
+### Scanner Power Analysis
+
+### Final Results
+
+
+## Conclusions
+
+
+<https://quarto.org>.
+
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
