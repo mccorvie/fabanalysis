@@ -58,7 +58,6 @@ quarter_names    <- pull( asml_revenue, "Quarter")
 
 rel_strength <- matrix( 1, nrow=ncol( by_product), ncol = ncol( by_region) )
 
-
 rownames( rel_strength ) <- product_names
 colnames( rel_strength ) <- region_names
 
@@ -72,10 +71,6 @@ rel_strength[ "EUV", "Taiwan"] = 2
 fine_attribution <- array( NA, dim=c(  ncol( by_product), ncol( by_region ),  nrow( asml_revenue ) ))
 dimnames( fine_attribution ) <- list( product_names, region_names, quarter_names)
 
-asml_revenue$Quarter
-
-xover <- which( "1Q23"== asml_revenue$Quarter)
-
 for( date_idx in 1:nrow( asml_revenue ))
 {
   region_target  <- by_region[date_idx,] |> as.numeric()
@@ -84,6 +79,7 @@ for( date_idx in 1:nrow( asml_revenue ))
   fine_attribution[ ,,date_idx ] <- ipf( rel_strength, product_target, region_target )  
 }
 
+fine_attribution
 
 asml_rev_attribution <- as_tibble( as.data.frame.table( fine_attribution)) |> 
   rename( `Product line`= Var1, Region=Var2, Quarter=Var3, `%` = Freq) |> 
@@ -109,13 +105,13 @@ asml_units_attribution <- asml_rev_attribution |>
   mutate( `Cum Units` = cumsum( Units ))  |> 
   ungroup()
 
-asml_units_attribution |> 
+asml_units_attribution |> datify() |> 
   filter( `Product line` == "EUV") |> 
-  ggplot( aes( x=Quarter, y=`Cum Units`,color=Region)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
+  ggplot( aes( x=Date, y=`Cum Units`,color=Region)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
 
-asml_units_attribution |> 
+asml_units_attribution |> datify() |> 
   filter( `Region` == "Taiwan") |> 
-  ggplot( aes( x=Quarter, y=`Cum Units`,color=`Product line`)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
+  ggplot( aes( x=Date, y=`Cum Units`,color=`Product line`)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
 
 asml_units_attribution |> filter( Region == "Taiwan", `Product line`=="EUV", Quarter ==max(Quarter))
 
@@ -132,9 +128,48 @@ asml_units_attribution |> filter( Quarter == "3Q23", Region == "Taiwan", `Produc
 asml_units_attribution |> filter( Quarter == "3Q23", `Product line`=="EUV") |> pull( `Cum Units`) |> sum()
 
 
+# heatmap
 
+heatmap_with_marginals_onepanel <- function(P, option="D") 
+{
+  stopifnot(is.matrix(P))
+  if( abs(sum(P) - 1) > 1e-10) P <- P / sum(P)
+  
+  nr <- nrow(P); nc <- ncol(P)
+  if (is.null(rownames(P))) rownames(P) <- paste0("r", 1:nr)
+  if (is.null(colnames(P))) colnames(P) <- paste0("c", 1:nc)
+  
+  # Main matrix tiles
+  main <- expand.grid(row = seq_len(nr), col = seq_len(nc), KEEP.OUT.ATTRS = FALSE) |>
+    mutate(p = as.vector(P))
+  
+  # Extra top row (column marginals) at row = nr + 1
+  top  <- tibble(row = nr + 1L, col = seq_len(nc), p = colSums(P))
+  # Extra right column (row marginals) at col = nc + 1
+  side <- tibble(row = seq_len(nr), col = nc + 1L, p = rowSums(P))
+  # Corner (leave blank)
+  corner <- tibble(row = nr + 1L, col = nc + 1L, p = NA_real_)
+  
+  all <- bind_rows(main, top, side, corner)
+  
+  ggplot(all, aes(col, row, fill = p)) +
+    geom_tile(color = "grey85", size = 0.2) +
+    scale_fill_viridis_c(name = "Probability", option=option, na.value = NA) +
+    # Only label the original matrix rows/cols; the extra row/col are unlabeled:
+    scale_x_continuous(breaks = 1:nc, labels = colnames(P), expand = c(0, 0)) +
+    scale_y_reverse(breaks = 1:nr, labels = rownames(P), expand = c(0, 0)) +
+    coord_fixed() +
+    labs(x = NULL, y = NULL) +
+    theme_minimal(base_size = 12) +
+    theme(panel.grid = element_blank(),
+          axis.text.x = element_text(angle = 20, hjust = 0.2, vjust = 0.3)) +
+    # Optional dark separators to “frame” the marginal strips:
+    geom_hline(yintercept = nr + 0.5, size = 1.5, colour = "azure") +
+    geom_vline(xintercept = nc + 0.5, size = 1.5, colour = "azure")
+}
 
+# demo
 
-
-
-
+P <- fine_attribution[,,15]
+heatmap_with_marginals_onepanel(P,"E")
+asml_revenue$Quarter[15 ]
