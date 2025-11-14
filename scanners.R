@@ -1,5 +1,6 @@
+library( tidyverse )
+source( "common.R")
 
-library( tidyverse)
 
 scanner_specs<-read_csv( "scanner_specs.csv")
 
@@ -29,6 +30,8 @@ NXE_allocation <- ASP_by_product |>
   select( -Sales, -Units, -ASP )
 
 sigma=30
+
+ASP_by_product
 
 # 100
 # 160

@@ -1,4 +1,5 @@
-library( tidyverse)
+library( tidyverse )
+source( "common.R")
 
 # exposure energy
 
@@ -54,12 +55,12 @@ wpm_est <- fab_phases |>
   mutate( 
     power_3nm = towers * 200/11 * scanner_power_fraction * node_3m,
     power_5nm = towers * 200/11 * scanner_power_fraction * (1-node_3m),
-    `3nm` = cumsum( power_3nm / power_NXE3600 * wpm_NXE3600 ),
-    `5nm` = cumsum( power_5nm / power_NXE3400 * wpm_NXE3400 )
-  ) |> 
+    `3nm` = cumsum( power_3nm / power_NXE3600 * wpm_NXE3800 ),
+    `5nm` = cumsum( power_5nm / power_NXE3400 * wpm_NXE3600 )
+  ) |>  
   pivot_longer( `3nm`:`5nm`, names_to = "Node", values_to = "wpm_energy" ) |> 
   left_join( analyst_estimates, by=join_by(Quarter, Node))
-
+wpm_est
 
 ggplot( wpm_est, aes( x=Quarter)) + 
   geom_step( aes(x=Quarter,y=`wpm_energy`, group=1), color="magenta")  + 
