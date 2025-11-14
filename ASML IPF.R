@@ -126,7 +126,7 @@ asml_units_attribution |>
   filter( `Region` == "Taiwan") |> 
   ggplot( aes( x=Quarter, y=`Cum Units`,color=`Product line`)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
 
-asml_units_attribution
+asml_units_attribution |> filter( Region == "Taiwan", `Product line`=="EUV", Quarter ==max(Quarter))
 
 
 #1Q19 11

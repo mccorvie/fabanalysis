@@ -45,9 +45,9 @@ NXE_allocation <-  ASP_by_product |>
 
 hours_per_month = 365.25/12*24
 
-OOE = 0.80
+efficiency = 0.80 # includes uptime, wafer rescan, everything
 wpm_EXE5000 = 185 * hours_per_month / 25/1000 * OOE
-wpm_NXE3800 = 220 * hours_per_month / 25/1000 * OOE
+wpm_NXE3800 = 220 * hours_per_month / 22/1000 * OOE
 wpm_NXE3600 = 160 * hours_per_month / 14/1000 * OOE
 wpm_NXE3400 = 135 * hours_per_month / 5/1000 * OOE
 
