@@ -128,7 +128,7 @@ asml_units_attribution |> filter( Quarter == "3Q23", Region == "Taiwan", `Produc
 asml_units_attribution |> filter( Quarter == "3Q23", `Product line`=="EUV") |> pull( `Cum Units`) |> sum()
 
 
-# heatmap
+# IPF heatmap 
 
 heatmap_with_marginals_onepanel <- function(P, option="D") 
 {
@@ -168,8 +168,10 @@ heatmap_with_marginals_onepanel <- function(P, option="D")
     geom_vline(xintercept = nc + 0.5, size = 1.5, colour = "azure")
 }
 
-# demo
+date_idx = 16
+P <- fine_attribution[,,date_idx]
+heatmap_with_marginals_onepanel(P,"G")
+asml_revenue$Quarter[date_idx ]
 
-P <- fine_attribution[,,15]
-heatmap_with_marginals_onepanel(P,"E")
-asml_revenue$Quarter[15 ]
+asml_revenue
+

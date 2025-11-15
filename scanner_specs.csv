@@ -1,4 +1,4 @@
-Inputs,,Type,Node,Wavelength,Resolution,NA,Wafer size (mm^2),Throughput (wph) ,ASP
+Model,Spec,Type,Node,Wavelength,Resolution,NA,Wafer size,Throughput,ASP
 EXE:5200B,[specs],EUV,<2nm,13.5nm,8nm,0.55,300,175,350
 EXE:5000,[specs],EUV,2nm,13.5nm,8nm,0.55,300,185,350
 NXE:3800E,[specs],EUV,2nm,13.5nm,13nm,0.33,300,220,230
