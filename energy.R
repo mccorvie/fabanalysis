@@ -20,51 +20,54 @@ power = pass_energy * wph / 1e3
 power # 1.3 MW
 
 
-
-fab_phases <- tibble(
-  HMV_date = mdy( c( 
-    "6/30/20",
-    "12/31/20",
-    "12/31/21",
-    "6/30/22",
-    "12/31/22",
-    "6/30/23",
-    "6/30/24",
-    "12/31/2025"
-  )),
+fab18_phases <- tibble(
+  Fab = "Fab18",
   Quarter = c( "3Q20", "4Q20", "4Q21", "2Q22", "4Q22", "2Q23", "2Q24", "4Q25"),
-  node_3m = c( 0,0,0,0.5,1,1,1,1),
+  node_3nm = c( 0,0,0,0.5,1,1,1,1),
   towers = c( 12,11,11,11,11,11,11,11)
-) |> mutate( Quarter = factor( Quarter, level=quarter_levels, ordered=T))
+) 
+
+fab21_phases <- tibble( Fab= "Fab21", Quarter = "3Q25", node_3nm = 0, towers = 11)
+
+fab_construction <- bind_rows( fab18_phases, fab21_phases ) |> 
+  mutate( Quarter = factor( Quarter, level=quarter_levels, ordered=T)) |> 
+  mutate( node_5nm = 1-node_3nm) 
+
 
 scanner_power_fraction <- 0.1
-power_3nm
-throughput_3nm
-
 
 efficiency = 0.80 # includes uptime, wafer rescan, everything
-wpm_EXE5000 = 185 * hours_per_month / 25/1000 * OOE
-wpm_NXE3800 = 220 * hours_per_month / 22/1000 * OOE
-wpm_NXE3600 = 160 * hours_per_month / 14/1000 * OOE
-wpm_NXE3400 = 135 * hours_per_month / 5/1000 * OOE
+wpm_NXE3800_3nm = 220 * hours_per_month / 22/1000 * efficiency
+wpm_NXE3600_5nm = 160 * hours_per_month / 12/1000 * efficiency
 
-power_NXE3400 <- 1.3
+power_NXE3800 <- 1.3
 power_NXE3600 <- 1.3
 
-wpm_est <- fab_phases |> 
+tsmc_capacity2 <- fab_construction |> 
   mutate( 
-    power_3nm = towers * 200/11 * scanner_power_fraction * node_3m,
-    power_5nm = towers * 200/11 * scanner_power_fraction * (1-node_3m),
-    `3nm` = cumsum( power_3nm / power_NXE3600 * wpm_NXE3800 ),
-    `5nm` = cumsum( power_5nm / power_NXE3400 * wpm_NXE3600 )
+    power_3nm = towers * 200/11 * scanner_power_fraction * node_3nm,
+    power_5nm = towers * 200/11 * scanner_power_fraction * node_5nm,
+    `3nm` = power_3nm / power_NXE3800 * wpm_NXE3800_3nm,
+    `5nm` = power_5nm / power_NXE3600 * wpm_NXE3600_5nm
   ) |>  
-  pivot_longer( `3nm`:`5nm`, names_to = "Node", values_to = "wpm_energy" ) |> 
+  pivot_longer( `3nm`:`5nm`, names_to = "Node", values_to = "Estimate WPM" ) |> 
+  group_by( Quarter, Node ) |> 
+  summarize( `Estimate WPM` = sum( `Estimate WPM`)) |> 
+  group_by( Node ) |> 
+  arrange( Quarter ) |> 
+  mutate( `Estimate WPM` = cumsum( `Estimate WPM`)) 
+
+tsmc_capacity2 <- tsmc_capacity2 |> 
   left_join( analyst_estimates, by=join_by(Quarter, Node))
-wpm_est
 
-ggplot( wpm_est, aes( x=Quarter)) + 
-  geom_step( aes(x=Quarter,y=`wpm_energy`, group=1), color="magenta")  + 
-  geom_step( aes(x=Quarter,y=`wpm_analyst`, group=1), color="darkgrey") +
-  facet_wrap( ~ Node )
+tsmc_production2 = filter(tsmc_wafer_production, Node %in%c( "3nm", "5nm"), Date>=ymd( 20200101))
 
-analyst_estimates
+tsmc_capacity2 |> datify() |> 
+  ggplot( aes( x=Date ) ) + 
+  geom_step( aes( y=`Estimate WPM`), color="purple" )  + 
+  geom_step( aes( y=`Analyst WPM` ), color="grey50" )  + 
+  geom_point( data=tsmc_production2, aes( y=wpm), color="maroon", size=0.5) +
+  facet_grid( rows=vars(`Node`)) +
+  ggtitle( "TSMC Production Capacity", subtitle = "Energy Construction Model")
+
+

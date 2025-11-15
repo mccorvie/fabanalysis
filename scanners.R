@@ -8,7 +8,8 @@ analyst_estimates<-read_csv( "analyst estimates by node.csv") |>
   rename( `7nm`= `7nm/10nm`) |> 
   pivot_longer( !starts_with("Quarter"), names_to= "Node", values_to="Analyst WPM")
 
-# Node Eff is the "effective node", a crude fudge to approximate actual usage rather than spec
+analyst_estimates |> datify() |> 
+  ggplot( aes( x=Date, y=`Analyst WPM`, color=Node)) +geom_line()
 
 
 effective_node <- tibble( 
@@ -33,10 +34,12 @@ node_layers <- tibble(
   Layers = c( 25, 22, 12, 4 )
 )
 
+ss <- 30
+
 scanner_model_allocation <- ASP_by_product |> 
   filter( `Product line` == "EUV") |> 
-  cbind( node_pricepoint) |> 
-  mutate( across( contains( ":"), \(x) dnorm( ASP, x, sigma ))) |> 
+  bind_cols( node_pricepoint) |> 
+  mutate( across( contains( ":"), \(x) dnorm( ASP, x, ss ))) |> 
   mutate( pnorm = rowSums( pick( contains( ":")))) |> 
   mutate( across( contains( ":"), \(x) x/pnorm)) |> 
   select( Quarter, `Product line`, contains( ":"))
@@ -50,11 +53,8 @@ scanner_allocation <- asml_units_attribution |>
   pivot_longer( contains(":"), names_to = "Model", values_to = "Units" ) 
   
 
-
 hours_per_month = 365.25/12*24
 efficiency = 0.80 # includes uptime, wafer rescan, everything
-
-scanner_allocation
 
 wpm_est <-  scanner_allocation |> 
   left_join( select( EUV_specs, Model, Throughput ), by = "Model") |> 
@@ -72,17 +72,18 @@ wpm_est <-  scanner_allocation |>
   ungroup()
 
 
-tsmc_maybe = filter( wpm_est, Region == "Taiwan", Node %in% c( "3nm", "5nm", "7nm")) |> 
+tsmc_capacity1 = filter( wpm_est, Region == "Taiwan", Node %in% c( "3nm", "5nm", "7nm")) |> 
   left_join( analyst_estimates, by = c( "Node", "Quarter"))
 
+tsmc_production1 = filter(tsmc_wafer_production, Node %in%c( "3nm", "5nm", "7nm"))
 
-filter( tsmc_maybe ) |> datify() |> 
+filter( tsmc_capacity1 ) |> datify() |> 
   ggplot( aes( x=Date ) ) + 
   geom_step( aes( y=`Estimate WPM`), color="purple" )  + 
   geom_step( aes( y=`Analyst WPM` ), color="grey50" )  + 
-  geom_point( data=filter( adv_nodes, Node != "10nm"), aes( y=wpm), color="maroon", size=0.5) +
+  geom_point( data= tsmc_production1, aes( y=wpm), color="maroon", size=0.5) +
   facet_grid( rows=vars(`Node`)) +
-  ggtitle( "TSMC Production Capacity", subtitle = "Supply Chain Model")
+  ggtitle( "TSMC Production Capacity", subtitle = "Scanner Tracker Model")
 
 
 # theme(

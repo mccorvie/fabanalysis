@@ -83,7 +83,7 @@ est_total0 |> pivot_longer( `Actual WPM`:`Estimate WPM`, names_to = "Series", va
 
 
 
-est_wafers <- tsmc_revenue |> 
+tsmc_wafer_production <- tsmc_revenue |> 
   select( Quarter, `3nm rev`:`0.1um+ rev`) |> 
   rename_with( \(x) str_remove( x," rev$" ), `3nm rev`:`0.1um+ rev`) |> 
   pivot_longer( `3nm`:`0.1um+`, names_to = "Node", values_to = "Revenue") |> 
@@ -92,9 +92,8 @@ est_wafers <- tsmc_revenue |>
   left_join( bls_ppi, by = "Quarter") |> 
   mutate( wpm = Revenue / ASP / PPI1 / 3 ) 
 
-est_wafers
 
-est_total <- est_wafers |> 
+est_total <- tsmc_wafer_production |> 
   group_by( Quarter ) |> 
   summarize( `Estimate WPM` = sum( wpm )) |> 
   ungroup() |> 
@@ -112,8 +111,8 @@ est_total |> pivot_longer( `Actual WPM`:`Estimate WPM`, names_to = "Series", val
 
 ## visualize
 
-adv_nodes<- filter(est_wafers, Node == "3nm" | Node == "5nm" | Node== "7nm" | Node == "10nm") |> datify()
-ggplot( adv_nodes, aes( x=Date, y=wpm, fill = Node) ) + geom_col() + scale_fill_brewer(palette= "Set3")
+filter( tsmc_wafer_production, Node %in% c( "3nm", "5nm","7nm","10nm")) |> datify() |> 
+  ggplot( aes( x=Date, y=wpm, fill = Node) ) + geom_col() + scale_fill_brewer(palette= "Set3")
 
 
 ##
