@@ -58,7 +58,8 @@ tsmc_capacity2 <- fab_construction |>
   mutate( `Estimate WPM` = cumsum( `Estimate WPM`)) 
 
 tsmc_capacity2 <- tsmc_capacity2 |> 
-  left_join( analyst_estimates, by=join_by(Quarter, Node))
+  full_join( analyst_estimates, by=join_by(Quarter, Node)) |> 
+  filter( Quarter >= "2Q19", Quarter<= "4Q25", Node %in% c( "3nm", "5nm"))
 
 tsmc_production2 = filter(tsmc_wafer_production, Node %in%c( "3nm", "5nm"), Date>=ymd( 20200101))
 
