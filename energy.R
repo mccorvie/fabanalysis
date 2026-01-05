@@ -71,4 +71,4 @@ tsmc_capacity2 |> datify() |>
   facet_grid( rows=vars(`Node`)) +
   ggtitle( "TSMC Production Capacity", subtitle = "Energy Construction Model")
 
-
+tsmc_capacity2

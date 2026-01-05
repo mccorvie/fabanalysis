@@ -5,29 +5,193 @@ format: html
 editor: visual
 ---
 
+```{r}
+#| echo: false
+#| results: hide
+
+library( tidyverse )
+source( "common.R")
+
+```
+
 ## Overview
 
-The ultimate goal of this project is to quantify global chip fabrication capacity.  
+The ultimate goal of this project is to quantify global chip fabrication capacity. Chips are an essential input for AI, so chip fabrication capacity is one way to understand the limits on AI scaling.
 
-It's useful to narrow the focus to the most advanced HPC chips, for two reasons.  These are chips used in AI workloads, so understanding these chips is most important for tracking AI progress and capabilities.  Second, the manufacturing for the most advanced chips is relatively concentrated, which makes the problem more tractable.
+It's useful to narrow the focus to the most advanced HPC chips, for two reasons. First, these are chips used in AI workloads, so understanding these chips is most important for tracking AI progress and capabilities. Second, the manufacturing for the most advanced chips is relatively concentrated, which makes the problem more tractable.
 
-The primary goal is to quantify the production and manufacturing capacity at TSMC, the largest supplier of chips for AI workloads, at the most advanced Nodes, 7nm and below.
+Therefore, the first phase of this project aims to quantify the production and manufacturing capacity at TSMC, the largest supplier of chips for AI workloads, at the most advanced nodes, 7nm and below.
 
-## Chip Manufacturing
+### Commercially supply chain analysis
 
+There are a number of organizations and analysts who sell research reports estimating all aspects of the semiconductor supply chain. This includes sector analysts at investment banks and buy-side investment firms, as well as industry consultants.
+
+This project encompassed approximately 70 hours of chatbot assisted research, but I am not a professional supply chain expert. Undoubtedly some of the commercially available research is deeper, more comprehensive and may have access to sources which are private or which I was unable to locate.
+
+-   [SEMI](https://www.semi.org/en) is the non-for-profit industry trade group for the semiconductor industry. One of their flagship products is the [fab forecast](https://www.semi.org/en/products-services/market-data/fab-forecast)
+-   [Knometa](https://knometa.com/services/reports/) published reports, though their final report was in 2024
+-   [Tech Insights](https://www.techinsights.com/) has reports on many aspects of the semiconductor supply chain
+-   [Counterpoint Research](https://counterpointresearch.com/en) is another semiconductor supply chain research firm
+
+### Official Data about Production Capacity
+
+TSMC does not directly report production capacity in fine detail, such as at the fab or node level. However, the official sources do provide some high-level statistics which anchor this analysis.
+
+-   At the end of 2024, across 4 GIGAFAB facilities (fab 12, fab 14, fab 15 and fab 18) which comprise the substantial majority of advanced node manufacturing, TSMC reports an annual capacity of 12.74 million 300mm wafers capacity (1,061 kwpm) [source](https://www.tsmc.com/english/dedicatedFoundry/manufacturing/gigafab)
+
+-   Annual capacity of the manufacturing facilities managed by TSMC and its subsidiaries approximately 17 million 12-inch equivalent wafers in 2024 (\~1,400 kwpm). [source](https://www.tsmc.com/english/dedicatedFoundry/manufacturing/gigafab)
+
+The [2024 annual report](https://investor.tsmc.com/static/annualReports/2024/english/index.html) states that total wafer shipments were 12.9 million 12-inch equivalent wafers as compared to 12.0 million 12-inch equivalent wafers in 2023. This implies a utilization rate of \~75%.
+
+Furthermore it states the total annual capacity is:
+
+| year | capacity      |
+|------|---------------|
+| 2023 | 16-17 million |
+| 2024 | 16-17 million |
+| 2025 | 17-18 million |
+
+## TSMC Wafer Production
+
+As a lower bound for production capacity, we seek to estimate the actual production. The industry standard production unit is "wafers per month", where a wafer is a thin silicon disc which is etched with of many individual chips. There are other stages of chip production which involve cutting the wafer into individual ships and packaging the chips on circuit boards. Historically the industry used a wafter with a 200mm (\~8") diameter, but modern nodes are etched on 300mm (\~12") diameter chips. When comparing production across nodes, usually a 300mm equivalent wafer is used. Since all the advanced nodes use 300mm, this is less relevant.
+
+::: {#wafer}
+![wafer](images/gleemingwafer.jpg)
+:::
 
 ### TSMC quarterly reports and revenue attribution
 
+
+```{r}
+#| echo: false
+#| output: false
+
+source( "TSMC shipments.R")
+```
+
+
+TSMC publishes total wafer production and wafer revenues figures broken out by node type in its [quarterly earnings reports](https://investor.tsmc.com/english/quarterly-results/2025/q4). TSMC also publishes the total number of wafers sold, so this aggregate be used to triangulate the wafers in each category. This information is available quarterly going back 9 years or so.
+
+If one knows the average sales price (ASP) for wafers in each category, then one could infer the number of wafers sold.
+
+::: {#quarterly-report-breakdown}
+![TSMC revenue breakdown](images/rev-breakdown.png){width="60%"}
+:::
+
+::: {#quarterly-report}
+![TSMC quarterly report](images/tsmc_rev.png){width="60%"}
+:::
+
 ### Average Sales Price (ASP) of wafers
+
+There are several publicly available sources which provide estimates of average wafer prices. It's reasonable to suppose that wafer prices are individually negotiated by each customer and depended on many details such as the size of the batch, the complexity of the chip, and many other factors. However, for a rough estimate we look only for the *average* sales price.
+
+Note that as a Taiwan-based company, TSMC reports its earnings in Taiwan dollars (TWD). However, as silicon wafers are a global commodity, it's reasonable to assume that prices are more commonly quoted in US dollars, and that the prices in dollars are more stable. Therefore we first convert revenues to dollars.
+
+-   In late 2022, a [report by DigiTimes](https://www.tomshardware.com/news/tsmc-will-charge-20000-per-3nm-wafer?utm_source=chatgpt.com) provided one estimate for ASP by node type
+-   A more recent [report by Creative Strategies](https://www.tomshardware.com/tech-industry/tsmcs-wafer-pricing-now-usd18-000-for-a-3nm-wafer-increased-by-over-3x-in-10-years-analyst) is more-or-less in line with that, and corroborates the steep increase in price by node.
+-   AnySilicon has a [wafer price explainer](https://anysilicon.com/wafer-cost/) with a curve estimating wafer prices.
+
+Synthesizing these sources, we take the following as the ASP by node
+
+::: {.center .small style="width: 60%;"}
+| Node      | ASP (\$k) |
+|-----------|-----------|
+| 3nm       | 20        |
+| 5nm       | 16        |
+| 7nm       | 10        |
+| 10nm      | 6         |
+| 16nm-20nm | 4         |
+| 28nm      | 3         |
+| 40nm-90nm | 2.6       |
+| 0.1um+    | 2         |
+:::
+
+With these prices, derived primarily from the source published in 2022, the total implied wafer production equals the reported wafer production within 5% for all four quarters of 2022. However, these prices underestimate production in earlier periods suggesting ASP's were lower then, and overestimates recent production suggesting ASP's are higher.  In the next section we describe an adjustment for broad price trends, and the adjusted and unadjusted total estimated wafer production is plotted below against the actual reported production.
+
+
+
+```{r}
+#| echo: false
+
+plotme<- est_total |> pivot_longer( `Total kWPM (Estimate)`:`Actual kWPM`, names_to = "Series", values_to = "kWPM") |> datify() |>
+  mutate( width = if_else( Series == "Actual kWPM", 1, 0.5 )) 
+
+ggplot( plotme, aes( x=Date)) +
+#  geom_line( aes(y=`Actual kWPM`, linewidth = width), color="darkgrey", size=1)+
+  geom_line(data = filter(plotme, Series == "Actual kWPM" ), aes(y=kWPM, color=Series), linewidth=1) +
+  geom_line( aes(y=kWPM, color=Series)) +
+  theme_minimal() + ylab("kWPM") + labs(title="Total Wafer Output vs Estimate")
+
+```
+
 
 ### Adjusting for broad price trends
 
+TSMC adjusts prices up and down according to demand and costs. It [raised prices](https://www.digitimes.com/news/a20210825PD209.html) by 10% in 2022, and is poised to [raise prices](https://bits-chips.com/article/tsmc-to-raise-advanced-process-prices-by-up-to-10-percent/) [again](https://www.trendforce.com/news/2025/09/05/news-tsmc-to-implement-a-significant-price-hike/?utm_source=chatgpt.com) in 2026. For advanced nodes, TSMC is the major supplier and it therefore has significant pricing power. It has stated that its target is sustained gross margins [above 50%](https://investor.tsmc.com/chinese/encrypt/files/encrypt_file/reports/2025-07/1f4f86c935f1de837672a6973154e64b26bdae57/TSMC%202Q25%20Transcript.pdf).
+
+To account for broad price trends, we incorporate the Beuro of Labor Statistic's Producer Price Index by Industry statistics.  Two series with suggestive names are [PCU33443344](https://fred.stlouisfed.org/series/PCU33443344) for "semiconductor and other electronic component manufacturing" and [PCU334413334413A](https://fred.stlouisfed.org/series/PCU334413334413A) for "other semiconductor devices, including transistors, diodes, and semiconductor parts such as wafers".  Both are plotted below, normalized to Q3 2022, the date of the article estimating ASP's above.  They show broadly similar trends, though the movements are larger for the more specific series ending in 13A.  
+
+```{r}
+#| echo: false
+pivot_longer( bls_ppi, PCU334413334413A:PCU33443344, names_to = "Index", values_to = "Level") |>
+  datify() |>
+  ggplot( aes( x=Date, y=Level, color=Index, group=Index ))+ geom_line(linewidth=1)+scale_color_brewer(palette="Set2")+theme_minimal()+labs(title = "Producer Price Index for Semiconductors")
+
+```
+
+
+We adjust the baseline prices from the DigiTimes report by the PPI.  This adjustment makes the total output estimated from revenues and ASP's better match the actual total output.
+
+
+```{r}
+#| echo: false
+
+ggplot( datify( est_total), aes( x=Date)) +
+  geom_segment(
+    aes( xend = Date, y = Error, yend = `Error adj`),
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    color="darkred"
+  ) +
+  geom_hline(yintercept=0, color="darkgrey") + theme_minimal() + labs(title= "Error Reduction from PPI Adjustment")
+
+```
+
+
 ### Regression analysis
+
+As an additional sanity check for the ASP's, we perform a linear regression of total wafer production against revenues by node.  The regression coefficients should correspond to reciprocal ASP's.  Owing to large error bars, the results are a bit inconclusive, but for the advanced nodes it shows the ASP's used for this analysis aren't wildly off base.
+
+The black points are the ASP's used in this analysis, and the purple.  Its worth noting that some of the error bars for the reciprocal ASP's pass through zero, which implies the error range for the ASP's includes infinity. 
+
+```{r}
+#| echo: false
+ggplot( ASP_regression, aes( x=Node )) +
+  geom_errorbar( aes(y=inv_ASP, ymax = inv_ASP+std, ymin=inv_ASP-std), color="purple") +
+  geom_point( aes(y=inv_ASP ), size=0.25,color="purple") +
+  geom_point(aes( y=inv_ASP_act), size=2) + theme_minimal() + labs(title="ASP Inferred by Regression") +
+  ylab( "1 / ASP")
+
+```
 
 ### Final results
 
+Pulling together the analysis of the past few sections, we arrive at an estimate of wafer production by node.
+
+```{r}
+#| echo: false
+
+filter( tsmc_wafer_production, Node %in% c( "3nm", "5nm","7nm","10nm")) |> datify() |> 
+  ggplot( aes( x=Date, y=kWPM, fill = Node) ) + geom_col() + scale_fill_brewer(palette= "Set3") + theme_minimal() + labs(title= "Estimated Wafer Production")
+
+```
+
+
 
 ## Supply Chain Model
+
+Turning now to production capacity, we 
+
 
 ### Chip manufacturing inputs
 
@@ -37,16 +201,13 @@ The primary goal is to quantify the production and manufacturing capacity at TSM
 
 ### Sanity Checks
 
-
 ### ASP and scanner attribution
 
 ### Scanner analysis
 
 ### Model Results
 
-
 ## Energy and Construciton Model
-
 
 ### Fab analysis
 
@@ -58,12 +219,9 @@ The primary goal is to quantify the production and manufacturing capacity at TSM
 
 ### Final Results
 
-
 ## Conclusions
 
-
 <https://quarto.org>.
-
 
 ```{r}
 1 + 1
