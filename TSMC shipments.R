@@ -140,9 +140,9 @@ ASP_regression <- tibble( std= coeff[,2], inv_ASP = coeff[,1], Node = names(ll$c
   left_join( wafer_asp, by="Node") |> 
   mutate( inv_ASP_act = 1/ASP)
 
-# ggplot( ASP_regression, aes( x=Node )) + 
-#   geom_errorbar( aes(y=inv_ASP, ymax = inv_ASP+std, ymin=inv_ASP-std), color="purple") + 
-#   geom_point( aes(y=inv_ASP ), size=0.25,color="purple") + 
+# ggplot( ASP_regression, aes( x=Node )) +
+#   geom_errorbar( aes(y=inv_ASP, ymax = inv_ASP+std, ymin=inv_ASP-std), color="purple") +
+#   geom_point( aes(y=inv_ASP ), size=0.25,color="purple") +
 #   geom_point(aes( y=inv_ASP_act), size=2) + theme_minimal() + labs(title="Regression-inferred ASP") +
 #   ylab( "Inverse ASP")
 

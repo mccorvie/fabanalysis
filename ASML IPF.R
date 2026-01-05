@@ -45,9 +45,6 @@ ASP_by_product <- sales_by_product |>
   filter( !is.na( Units ) ) |> 
   mutate( ASP = Sales / Units ) 
 
-# |> pivot_wider( id_cols = Quarter, names_from=`Product line`, values_from = ASP )
-
-
 by_product <- asml_revenue |> select( `EUV %`:`Metrology & Inspection %`)
 by_region  <- asml_revenue |> select( `China %`:`EMEA %`)
 
@@ -79,7 +76,6 @@ for( date_idx in 1:nrow( asml_revenue ))
   fine_attribution[ ,,date_idx ] <- ipf( rel_strength, product_target, region_target )  
 }
 
-fine_attribution
 
 asml_rev_attribution <- as_tibble( as.data.frame.table( fine_attribution)) |> 
   rename( `Product line`= Var1, Region=Var2, Quarter=Var3, `%` = Freq) |> 
@@ -91,8 +87,10 @@ EUV_rev  <- asml_rev_attribution |>
   mutate( `%` = `%` / sum( `%`)) |> 
   ungroup()
 
-
-ggplot( EUV_rev, aes( x=Quarter, y=`%`,fill=Region)) +geom_col() + scale_fill_brewer(palette= "Set3")
+# datify(EUV_rev) |>  
+#   ggplot( aes( x=Date, y=`%`,fill=Region)) +geom_col() + scale_fill_brewer(palette= "Set3") +
+#   scale_y_continuous(labels = scales::percent)+
+#   theme_minimal() + labs( title="Allocation of EUV Scanners")
 
 
 asml_units_attribution <- asml_rev_attribution |> 
@@ -105,13 +103,13 @@ asml_units_attribution <- asml_rev_attribution |>
   mutate( `Cum Units` = cumsum( Units ))  |> 
   ungroup()
 
-asml_units_attribution |> datify() |> 
-  filter( `Product line` == "EUV") |> 
-  ggplot( aes( x=Date, y=`Cum Units`,color=Region)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
-
-asml_units_attribution |> datify() |> 
-  filter( `Region` == "Taiwan") |> 
-  ggplot( aes( x=Date, y=`Cum Units`,color=`Product line`)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
+# asml_units_attribution |> datify() |> 
+#   filter( `Product line` == "EUV") |> 
+#   ggplot( aes( x=Date, y=`Cum Units`,color=Region)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
+# 
+# asml_units_attribution |> datify() |> 
+#   filter( `Region` == "Taiwan") |> 
+#   ggplot( aes( x=Date, y=`Cum Units`,color=`Product line`)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
 
 asml_units_attribution |> filter( Region == "Taiwan", `Product line`=="EUV", Quarter ==max(Quarter))
 
@@ -130,7 +128,7 @@ asml_units_attribution |> filter( Quarter == "3Q23", `Product line`=="EUV") |> p
 
 # IPF heatmap 
 
-heatmap_with_marginals_onepanel <- function(P, option="D") 
+heatmap_with_marginals_onepanel <- function(P, option="D", quarter) 
 {
   stopifnot(is.matrix(P))
   if( abs(sum(P) - 1) > 1e-10) P <- P / sum(P)
@@ -153,25 +151,25 @@ heatmap_with_marginals_onepanel <- function(P, option="D")
   all <- bind_rows(main, top, side, corner)
   
   ggplot(all, aes(col, row, fill = p)) +
-    geom_tile(color = "grey85", size = 0.2) +
-    scale_fill_viridis_c(name = "Probability", option=option, na.value = NA) +
+    geom_tile(color = "grey85", linewidth = 0.2) +
+    scale_fill_viridis_c(name = "Proportion", option=option, na.value = NA) +
     # Only label the original matrix rows/cols; the extra row/col are unlabeled:
     scale_x_continuous(breaks = 1:nc, labels = colnames(P), expand = c(0, 0)) +
     scale_y_reverse(breaks = 1:nr, labels = rownames(P), expand = c(0, 0)) +
     coord_fixed() +
-    labs(x = NULL, y = NULL) +
+    labs(x = NULL, y = NULL, title=paste("Attribution Matrix", quarter)) +
     theme_minimal(base_size = 12) +
     theme(panel.grid = element_blank(),
           axis.text.x = element_text(angle = 20, hjust = 0.2, vjust = 0.3)) +
     # Optional dark separators to “frame” the marginal strips:
-    geom_hline(yintercept = nr + 0.5, size = 1.5, colour = "azure") +
-    geom_vline(xintercept = nc + 0.5, size = 1.5, colour = "azure")
+    geom_hline(yintercept = nr + 0.5, linewidth = 1.5, colour = "azure") +
+    geom_vline(xintercept = nc + 0.5, linewidth = 1.5, colour = "azure")
 }
 
-date_idx = 16
-P <- fine_attribution[,,date_idx]
-heatmap_with_marginals_onepanel(P,"G")
-asml_revenue$Quarter[date_idx ]
-
-asml_revenue
+# date_idx <- 18
+# quarter <- dimnames( fine_attribution)[[3]][date_idx]
+# P <- fine_attribution[,,date_idx]
+# heatmap_with_marginals_onepanel(P,"D",quarter)
+# asml_revenue$Quarter[date_idx ]
+# asml_revenue
 
