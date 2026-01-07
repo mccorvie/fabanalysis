@@ -11,7 +11,6 @@ analyst_estimates<-read_csv( "analyst estimates by node.csv") |>
 analyst_estimates |> datify() |> 
   ggplot( aes( x=Date, y=`Analyst WPM`, color=Node)) +geom_line()
 
-
 effective_node <- tibble( 
     Model = c( "EXE:5200B", "EXE:5000", "NXE:3800E", "NXE:3600D", "NXE:3400C" ),
     `2nm` = c( 0.5, 1, 0, 0, 0 ),
@@ -20,7 +19,6 @@ effective_node <- tibble(
     `7nm` = c( 0, 0, 0, 0,   0.5 ),
 )
 
-
 EUV_specs <- read_csv( "scanner_specs.csv") |> 
   filter( Type == "EUV") 
 
@@ -28,26 +26,31 @@ node_pricepoint <- EUV_specs |>
   select( Model, ASP) |>
   pivot_wider( names_from = Model, values_from = ASP )
   
-
+node_pricepoint
 node_layers <- tibble( 
   Node = c( "2nm", "3nm", "5nm", "7nm" ),
   Layers = c( 25, 22, 12, 4 )
 )
 
+
 ss <- 30
 
 scanner_model_allocation <- ASP_by_product |> 
-  filter( `Product line` == "EUV") |> 
+  filter( `Technology` == "EUV") |> 
   bind_cols( node_pricepoint) |> 
   mutate( across( contains( ":"), \(x) dnorm( ASP, x, ss ))) |> 
   mutate( pnorm = rowSums( pick( contains( ":")))) |> 
   mutate( across( contains( ":"), \(x) x/pnorm)) |> 
-  select( Quarter, `Product line`, contains( ":"))
+  select( Quarter, `Technology`, contains( ":"))
 
+# scanner_model_allocation |> pivot_longer( `EXE:5200B`:`NXE:3400C`, names_to = "Product line", values_to = "%") |> 
+#   datify() |> 
+#   ggplot( aes( x=Date, y=`%`, fill=`Product line`)) + geom_col() + scale_fill_brewer(palette="Set3") +
+#   theme_minimal() + labs(title="Scanner Model Allocation")
 
 scanner_allocation <- asml_units_attribution |> 
-  filter( `Product line` == "EUV") |> 
-  left_join( scanner_model_allocation, by=join_by( Quarter, `Product line`)) |> 
+  filter( `Technology` == "EUV") |> 
+  left_join( scanner_model_allocation, by=join_by( Quarter, `Technology`)) |> 
   mutate( across( contains( ":"), \(x) Units * x )) |> 
   select( Region, Quarter, contains( ":")) |> 
   pivot_longer( contains(":"), names_to = "Model", values_to = "Units" ) 
@@ -76,14 +79,14 @@ tsmc_capacity1 = filter( wpm_est, Region == "Taiwan", Node %in% c( "3nm", "5nm",
   left_join( analyst_estimates, by = c( "Node", "Quarter"))
 
 tsmc_production1 = filter(tsmc_wafer_production, Node %in%c( "3nm", "5nm", "7nm"))
-
-filter( tsmc_capacity1 ) |> datify() |> 
-  ggplot( aes( x=Date ) ) + 
-  geom_step( aes( y=`Estimate WPM`), color="purple" )  + 
-  geom_step( aes( y=`Analyst WPM` ), color="grey50" )  + 
-  geom_point( data= tsmc_production1, aes( y=wpm), color="maroon", size=0.5) +
-  facet_grid( rows=vars(`Node`)) +
-  ggtitle( "TSMC Production Capacity", subtitle = "Scanner Tracker Model")
+# 
+# filter( tsmc_capacity1 ) |> datify() |>
+#   ggplot( aes( x=Date ) ) +
+#   geom_step( aes( y=`Estimate WPM`), color="purple" )  +
+#   geom_step( aes( y=`Analyst WPM` ), color="grey50" )  +
+#   geom_point( data= tsmc_production1, aes( y=kWPM), color="maroon", size=0.5) +
+#   facet_grid( rows=vars(`Node`)) +
+#   ggtitle( "TSMC Production Capacity", subtitle = "Scanner Tracker Model") + theme_minimal()
 
 
 # theme(

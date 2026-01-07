@@ -33,15 +33,15 @@ sales_by_product <- asml_revenue |>
   mutate( across( `EUV %`:`EMEA %`, \(x) x * `Net Sales` )) |>
   select( Quarter, `EUV %`:`EMEA %` ) |> 
   rename_with( \(c) str_remove( c, " %$"), !starts_with("Qu") ) |> 
-  pivot_longer( !starts_with( "Quarter"), names_to="Product line", values_to = "Sales")
+  pivot_longer( !starts_with( "Quarter"), names_to="Technology", values_to = "Sales")
 
 units_by_product <- asml_revenue |> 
   select( Quarter, `EUV #`:`I-line #`) |> 
   rename_with( \(c) str_remove( c, " #$"), !starts_with("Qu") ) |> 
-  pivot_longer(  !starts_with( "Quarter" ), names_to="Product line", values_to = "Units")
+  pivot_longer(  !starts_with( "Quarter" ), names_to="Technology", values_to = "Units")
 
 ASP_by_product <- sales_by_product |> 
-  left_join( units_by_product, by=join_by( "Quarter", "Product line")) |> 
+  left_join( units_by_product, by=join_by( "Quarter", "Technology")) |> 
   filter( !is.na( Units ) ) |> 
   mutate( ASP = Sales / Units ) 
 
@@ -78,11 +78,11 @@ for( date_idx in 1:nrow( asml_revenue ))
 
 
 asml_rev_attribution <- as_tibble( as.data.frame.table( fine_attribution)) |> 
-  rename( `Product line`= Var1, Region=Var2, Quarter=Var3, `%` = Freq) |> 
+  rename( `Technology`= Var1, Region=Var2, Quarter=Var3, `%` = Freq) |> 
   mutate( Quarter = factor( Quarter, levels = quarter_levels, ordered=T))
 
 EUV_rev  <- asml_rev_attribution |> 
-  filter( `Product line` == "EUV" ) |> 
+  filter( `Technology` == "EUV" ) |> 
   group_by( `Quarter`) |> 
   mutate( `%` = `%` / sum( `%`)) |> 
   ungroup()
@@ -94,24 +94,24 @@ EUV_rev  <- asml_rev_attribution |>
 
 
 asml_units_attribution <- asml_rev_attribution |> 
-  group_by( `Product line`, Quarter ) |> 
+  group_by( `Technology`, Quarter ) |> 
   mutate( `%` = `%` / sum( `%`)) |> 
-  left_join( units_by_product, by = join_by( Quarter, `Product line`) ) |> 
+  left_join( units_by_product, by = join_by( Quarter, `Technology`) ) |> 
   mutate( Units = Units * `%`) |> 
-  group_by( Region, `Product line` ) |> 
+  group_by( Region, `Technology` ) |> 
   arrange( Quarter ) |> 
   mutate( `Cum Units` = cumsum( Units ))  |> 
   ungroup()
 
 # asml_units_attribution |> datify() |> 
-#   filter( `Product line` == "EUV") |> 
+#   filter( `Technology` == "EUV") |> 
 #   ggplot( aes( x=Date, y=`Cum Units`,color=Region)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
 # 
 # asml_units_attribution |> datify() |> 
 #   filter( `Region` == "Taiwan") |> 
-#   ggplot( aes( x=Date, y=`Cum Units`,color=`Product line`)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
+#   ggplot( aes( x=Date, y=`Cum Units`,color=`Technology`)) +geom_line() + geom_point()+ scale_color_brewer(palette= "Set2") + theme_minimal()
 
-asml_units_attribution |> filter( Region == "Taiwan", `Product line`=="EUV", Quarter ==max(Quarter))
+asml_units_attribution |> filter( Region == "Taiwan", `Technology`=="EUV", Quarter ==max(Quarter))
 
 
 #1Q19 11
@@ -121,9 +121,9 @@ asml_units_attribution |> filter( Region == "Taiwan", `Product line`=="EUV", Qua
 #ut of 202  (113/202 = 56%)
 
 
-asml_units_attribution |> filter( Quarter == "1Q19", Region == "Taiwan", `Product line`=="EUV") |> pull( `Cum Units`)
-asml_units_attribution |> filter( Quarter == "3Q23", Region == "Taiwan", `Product line`=="EUV" ) |> pull( `Cum Units`)
-asml_units_attribution |> filter( Quarter == "3Q23", `Product line`=="EUV") |> pull( `Cum Units`) |> sum()
+asml_units_attribution |> filter( Quarter == "1Q19", Region == "Taiwan", `Technology`=="EUV") |> pull( `Cum Units`)
+asml_units_attribution |> filter( Quarter == "3Q23", Region == "Taiwan", `Technology`=="EUV" ) |> pull( `Cum Units`)
+asml_units_attribution |> filter( Quarter == "3Q23", `Technology`=="EUV") |> pull( `Cum Units`) |> sum()
 
 
 # IPF heatmap 

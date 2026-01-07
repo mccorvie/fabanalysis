@@ -20,6 +20,9 @@ power = pass_energy * wph / 1e3
 power # 1.3 MW
 
 
+900  # kWh for for "patterning per wafer"
+300 * 220 /20 #kwh / wafer  x wafers / hour
+
 fab18_phases <- tibble(
   Fab = "Fab18",
   Quarter = c( "3Q20", "4Q20", "4Q21", "2Q22", "4Q22", "2Q23", "2Q24", "4Q25"),
@@ -34,7 +37,7 @@ fab_construction <- bind_rows( fab18_phases, fab21_phases ) |>
   mutate( node_5nm = 1-node_3nm) 
 
 
-scanner_power_fraction <- 0.1
+scanner_power_fraction <- 0.11
 
 efficiency = 0.80 # includes uptime, wafer rescan, everything
 wpm_NXE3800_3nm = 220 * hours_per_month / 22/1000 * efficiency
@@ -62,13 +65,17 @@ tsmc_capacity2 <- tsmc_capacity2 |>
   filter( Quarter >= "2Q19", Quarter<= "4Q25", Node %in% c( "3nm", "5nm"))
 
 tsmc_production2 = filter(tsmc_wafer_production, Node %in%c( "3nm", "5nm"), Date>=ymd( 20200101))
-
-tsmc_capacity2 |> datify() |> 
-  ggplot( aes( x=Date ) ) + 
-  geom_step( aes( y=`Estimate WPM`), color="purple" )  + 
-  geom_step( aes( y=`Analyst WPM` ), color="grey50" )  + 
-  geom_point( data=tsmc_production2, aes( y=wpm), color="maroon", size=0.5) +
-  facet_grid( rows=vars(`Node`)) +
-  ggtitle( "TSMC Production Capacity", subtitle = "Energy Construction Model")
+# 
+# tsmc_capacity2 |> datify() |> 
+#   ggplot( aes( x=Date ) ) + 
+#   geom_step( aes( y=`Estimate WPM`), color="purple" )  + 
+#   geom_step( aes( y=`Analyst WPM` ), color="grey50" )  + 
+#   geom_point( data=tsmc_production2, aes( y=kWPM), color="maroon", size=0.5) +
+#   facet_grid( rows=vars(`Node`)) +
+#   ggtitle( "TSMC Production Capacity", subtitle = "Energy Construction Model")
 
 tsmc_capacity2
+
+
+
+200 * 0.11 / (1.31 * 0.8) * 8
