@@ -23,22 +23,23 @@ source( "common.R")
 
 ## Overview
 
-This research project describes some methods to get rough estimates of the chip production capacity of TSMC on the most advanced nodes, primarily the advanced 5nm and 3nm nodes.  These are the nodes used for the most advanced chips, including Apple silicon and NVidia's most advanced HPC GPU's.  Using official statements from TSMC, industry media reports and open source intelligence (OSINT) we describe several methodologies to triangulate these quantities.
+This report describes several methods to make rough estimates of the chip production capacity of TSMC on the most advanced nodes, primarily the 5nm and 3nm nodes.  These are the nodes used for the most advanced chips, including Apple silicon, Google's TPUs and NVidia's most advanced HPC GPUs.  Using official statements from TSMC, industry media reports and open source intelligence (OSINT) we describe several methodologies to triangulate these quantities.  Ideally we would lke to quantify effective capacity: how much can be actually produced with high utilization, accouting for downtown, yield ramps and maintanence.  In practice we identify the installed capacity of the tools and fabs, and scale that by a utilization factor (assumed to be 80\%) to account for production factors separate from tooling.
 
-The ultimate goal of this project is to quantify global chip fabrication capacity. Chips are an essential input for AI, so chip fabrication capacity is one way to understand the limits on AI scaling.  
-However, the bulk of the chips used in AI are currently manufactured by NVidia, and NVidia uses TSMC as their primary fab for manufacturing the chips.  Google and AMD also use TSMC as their primary fab for their own TPU's and GPU's.   
+The broader aim of this project is to quantify global chip fabrication capacity. Chips are an essential input for AI, so chip fabrication capacity is one way to understand the limits on AI scaling.  
+However, the bulk of the chips used in AI are currently manufactured by NVidia, and NVidia uses TSMC as their primary fab for manufacturing the chips.  Google and AMD also currently use TSMC as their primary fab.  So focusing on the most advanced nodes at TSMC is a reasonable place to start.  
 
 This project describes three approaches.  First using TSMC's earnings reports and public information about wafer pricing, we estimate TSMC's actual production by node.  Second, using ASML's earnings reports, we estimate which global fabs possess the most advanced lithography scanners.  Using the specifications listed for ASML's product lines, we estimate capacity.  Finally, using satellite imagery and industry reports, we estimate the energy usage of two of TSMC's advanced fabs, and use this to estimate production capacity.
 
-The analysis for this project was coded by Ryan McCorvie in R.  The source code may be found in the [fabanalysis](https://github.com/mccorvie/fabanalysis) on github.
+The results are reasonable and robust.  This report's production estimates are within 10\% of reported wafer production for all quarters within the analysis.  This report's capacity estimates for  advanced nodes (7nm, 5nm, 3nm) is within 10\% of the capacity reported by TSMC for their four GIGAFAB's.  These fabs are responsible for the production of substantially all of the advanced nodes, though its unclear how much of the capacity in the GIGAFAB's is for legacy nodes.  The time series of production capacity broadly aligns with the capacity reported by other industry analysts.
+
 
 ### Commercially Available Supply Chain Analysis
 
-Given the important role that semiconductors play in industry, and the growing importance of AI, there are a number of organizations and analysts who sell research reports estimating all aspects of the semiconductor supply chain. This includes sector analysts at investment banks and buy-side investment firms, as well as industry consultants.  Undoubtedly the techniques described in this research project are not novel, but they are open source depending only on publicly available information and they are replacable.  
+Given the important role that semiconductors play in industry, and the growing importance of AI, there are a number of organizations and analysts who sell research reports estimating all aspects of the semiconductor supply chain. This includes sector analysts at investment banks and buy-side investment firms, as well as industry consultants.  Undoubtedly the approaches described in this research report are not novel.  However, they depend only on publicly available information and they are replicable.  
 
-This project encompassed approximately 70 hours of chatbot assisted research.  However, the author is not a professional supply chain expert.  Undoubtedly some of the commercially available research is deeper, more comprehensive and may have access to sources which are private or which I was unable to locate.  For the most part, commercially available research may not be publicly republished.
+This project encompassed approximately 70 hours of chatbot-assisted research.  However, the author is not a professional supply chain expert.  Undoubtedly the research available commercially is deeper, more comprehensive, and be based on sources which are private or which the author was unable to locate.  On the other hand, commercial research reports generally may not be republished, whereas the methods here are open and based on public data.
 
-Here is a list of some firms which sell similar kinds of supply chain analysis:
+Here is a list of some firms which sell semiconductor supply chain analysis related to fab capacity:
 
 -   [SEMI](https://www.semi.org/en) is the non-for-profit industry trade group for the semiconductor industry. One of their flagship products is the [fab forecast](https://www.semi.org/en/products-services/market-data/fab-forecast).
 -   [Knometa](https://knometa.com/services/reports/) also publishes research reports on manufacturing capacity, though their final report was in 2024
@@ -47,11 +48,11 @@ Here is a list of some firms which sell similar kinds of supply chain analysis:
 
 ### Quantifying Wafer Production
 
-The industry standard production unit is "wafers per month", where a wafer is a thin silicon disc which is etched with of many individual chips. There are other stages of chip production which involve cutting the wafer into individual chips and packaging the chips on circuit boards. Historically the industry used a wafter with a 200mm (\~8") diameter, but modern nodes are etched on 300mm (\~12") diameter chips. When comparing production across nodes, usually a 300mm equivalent wafer is used. Since all the advanced nodes use 300mm, this is less relevant.
+The industry standard production unit is "wafers per month" which refers the number of finished silicon wafers  produced in one month.  A wafer is a thin silicon disc which is etched and doped to produce many individual semiconductor chips.  After wafer production, there are other stages of production which involve cutting the wafer into individual chips and packaging the chips, and assembling them onto circuit boards and devices.  Modern nodes are etched onto 300mm (\~12") diameter wafers.  Sometimes capacity and production is reported in 300mm-equivalents to convert production of older 200mm (\~8") diameter wafers into a comparable unit.
 
-In the search to continue scaling chip power at Moore's law, increasingly elaborate engineering techniques have been developed.  The most advanced chips use a methodology called Extreme Ultraviolet (EUV) lithography, where a laser vaporizes a droplet of tin, and the plasma emits light at 13.5nm frequency.  The laser is reflected through a reticle with a mask, then focused on the silicon.  The wafer is covered in photoresist which reacts when exposed to light.  Subsequent stages remove the photo resist and etch the silicon in the patterns from the mask.  For modern nodes, the same wafer is rescanned many times with different patterns to etch a three dimensional pattern on the silicon.
+Increasingly elaborate engineering techniques have been developed to make chips smaller, faster and more capable.  The most advanced chips use a methodology called Extreme Ultraviolet (EUV) lithography, where a laser vaporizes a droplet of tin, and the resulting plasma emits light at a wavelength of 13.5nm.  The light is reflected through a reticle with a mask, then focused on the silicon wafer surface.  The surface has been coated with photoresist which reacts when exposed to light.  Subsequent stages remove the photo resist and etch the silicon with the patterns from the mask.  For modern nodes, the same wafer is may be exposed and etched several times to make the final pattern.
 
-Different generations of technology are roughly grouped in to "nodes".  The nodes originally represented a physical property of the size of the patterns etched into silicon, but this is no longer the case.  For marketing reasons, these nodes are generally related to a physical measurement.  The most advanced high-production nodes are currently 5nm and 3nm, though research is being conducted into 2nm and 1.7 angstron nodes.  Different firms use different marketing terms, and nodes are not always directly comparable between firms.  Moreover, firms distinguish their manufacturing process with additional modifiers, so you will see nodes described as "N7+" or "N3E" where the "E" stands for "enhanced".  In this research note, for lack of more finely grained data, we will elide these distinctions and use node labels like "7nm", "5nm" and "3nm".
+Different generations of technology are grouped into "nodes".  The nodes originally represented a physical property of the size of the patterns etched into silicon, but this is no longer the case.  However, the tradition of naming nodes after a length-scale continues.  The most advanced high-production nodes are currently 5nm and 3nm, though research is being conducted into 2nm and 1.7 angstrom (A17) nodes.  Different firms use different marketing terms, and nodes are not always directly comparable between firms.  Industry reports sometimes distinguish their manufacturing process with additional modifiers, so you will see nodes described as "N7+" or "N3E" where the "E" stands for "enhanced".  In this research note, for lack of more finely grained data, we will set aside some of these these distinctions and use node labels like "7nm", "5nm" and "3nm".
 
 ![wafer](images/gleemingwafer.jpg)
 
@@ -60,11 +61,11 @@ Different generations of technology are roughly grouped in to "nodes".  The node
 
 TSMC does not directly report production capacity in fine detail, such as at the fab or node level. However, the official sources do provide some high-level statistics which anchor this analysis.
 
--   At the end of 2024, across 4 GIGAFAB facilities (fab 12, fab 14, fab 15 and fab 18) which comprise the substantial majority of advanced node manufacturing, TSMC reports an annual capacity of 12.74 million 300mm wafers capacity (1,061 kwpm) [source](https://www.tsmc.com/english/dedicatedFoundry/manufacturing/gigafab)
+-   At the end of 2024, across 4 GIGAFAB facilities (fab 12, fab 14, fab 15 and fab 18) which comprise the bulk of advanced node manufacturing, TSMC reports an annual capacity of 12.74 million 300mm-equivalent wafer capacity, which translates to 1,061 kwpm.   [source](https://www.tsmc.com/english/dedicatedFoundry/manufacturing/gigafab)
 
--   Annual capacity of the manufacturing facilities managed by TSMC and its subsidiaries approximately 17 million 12-inch equivalent wafers in 2024 (\~1,400 kwpm). [source](https://www.tsmc.com/english/dedicatedFoundry/manufacturing/gigafab)
+-  Annual production capacity for all of the manufacturing facilities managed by TSMC and its subsidiaries was approximately 17 million 300mm equivalent wafers and the end of 2024 (\~1,400 kwpm). [source](https://www.tsmc.com/english/dedicatedFoundry/manufacturing/gigafab)
 
-The [2024 annual report](https://investor.tsmc.com/static/annualReports/2024/english/index.html) states that total wafer shipments were 12.9 million 12-inch equivalent wafers as compared to 12.0 million 12-inch equivalent wafers in 2023. This implies a utilization rate of \~75%.
+The [2024 annual report](https://investor.tsmc.com/static/annualReports/2024/english/index.html) states that total wafer shipments were 12.9 million 300mm-equivalent wafers as compared to 12.0 million 300mm-equivalent wafers in 2023. This implies a utilization rate of \~75\%.
 
 Furthermore it states the total annual capacity is:
 
@@ -85,14 +86,17 @@ Furthermore it states the total annual capacity is:
 source( "TSMC shipments.R")
 ```
 
-As a lower bound for production capacity, we seek to estimate the actual production.  Understanding actual shipments is also useful for quantifying the AI capacity of firms farther down the supply chain.  Our approach is to use quarterly earnings statements published by TSMC for investors.  In order to translate revenues to wafer shipments, we devise a model to estimate the average sales price (ASP) of various production nodes.
+As a lower bound for production capacity, we seek to estimate the actual production.  Understanding actual shipments is also useful for quantifying the capacity of AI firms farther down the supply chain.  Our approach is rooted in the quarterly earnings statements published by TSMC for investors.  
 
+Short outline of the methodology:
 
-### Results
+1. Use earnings report attribution to get sales numbers by node
+1. Estimate wafer prices using industry reports to convert sales numbers to unit sales
+1. Compare total sales across nodes to sales reported in earnings
+1. Adjust the prices using broad semiconductor price indices
 
-Cutting to the chase, here are the results of the model.  In subsequent sections we will discuss the various methodologies and assumptions which comprise this approach.
+Here are estimates of TSMC wafer production by node over the past 10 years.  In subsequent sections we will discuss the various methodologies and assumptions which comprise this approach.
 
-Here are estimates of TSMC wafer production by node over the past 10 years.
 
 ```{r}
 #| echo: false
@@ -105,8 +109,7 @@ filter( tsmc_wafer_production, Node %in% c( "3nm", "5nm","7nm","10nm")) |> datif
 
 ### TSMC quarterly reports and revenue attribution
 
-
-TSMC publishes total wafer production and wafer revenues figures broken out by node type in its [quarterly earnings reports](https://investor.tsmc.com/english/quarterly-results/2025/q4). TSMC also publishes the total number of wafers sold, so this aggregate be used to triangulate the wafers in each category. This information is available quarterly going back 9 years or so.
+TSMC publishes total wafer production and wafer revenues figures broken out by node type in its [quarterly earnings reports](https://investor.tsmc.com/english/quarterly-results/2025/q4). TSMC also publishes the total number of wafers shipments, so this aggregate be used to triangulate the wafers in each category. This information is available quarterly going back 9 years or so.
 
 In order to translate from sales revenues to number of wafers, one needs to know the average sales price (ASP) for wafers in each category.  The remainder of this analysis will focus on estimates of the ASP.
 
@@ -127,7 +130,9 @@ As a Taiwan-based company, TSMC reports its earnings in Taiwan dollars (NT$). Ho
 -   A more recent [report by Creative Strategies](https://www.tomshardware.com/tech-industry/tsmcs-wafer-pricing-now-usd18-000-for-a-3nm-wafer-increased-by-over-3x-in-10-years-analyst) is more-or-less in line with that, and corroborates the steep increase in price by node.
 -   AnySilicon published [wafer price explainer](https://anysilicon.com/wafer-cost/) with a curve with wafer price estimates by node.
 
-Synthesizing these sources, we take the following as the ASP by node
+Synthesizing these sources, we use the following table as a rough anchor for translation of revenue to wafer volume.  Actual prices may vary.
+
+we take the following as the ASP by node
 
 ::: {.center .small style="width: 60%;"}
 | Node      | ASP (\$k) |
@@ -142,9 +147,9 @@ Synthesizing these sources, we take the following as the ASP by node
 | 0.1µm+    | 2         |
 :::
 
-With these prices, we translate revenues in each node category to quantities of wafers sold.  Summing over the quantities in each category yields a total number of wafers sold which can be compared to the published total number of wafers sold.  Our ASP estimates are primarily from the source published in 2022, and the total implied wafer production equals the reported wafer production within 5% for all four quarters of 2022.
+With these prices, we translate revenues in each node category to wafer shipment numbers.  Summing over the quantities in each category yields a total number of wafers shipments which can be compared to the actual reported total wafer shipments.  Our ASP estimates are primarily from the source published in 2022, and the total implied wafer production calibrates well (within 5\%) to four quarters of 2022.
 
-A comparison between the estimated total wafers sold and the actual reported total wafers sold is shown below.  Using these prices underestimates production in periods earler than 2022, suggesting ASP's were lower then, and overestimates recent production, suggesting ASP's are higher.  Also plotted are the results of an adjustment described in the next section.
+A comparison between the estimated total wafers shipments and the actual reported total wafers shipments is shown below.  Using these prices underestimates production in periods earlier than 2022, suggesting ASPs were lower then, and overestimates recent production, suggesting ASPs are higher.  Also plotted are the results of an adjustment described in the next section.
 
 
 ```{r}
@@ -166,9 +171,9 @@ ggplot( plotme, aes( x=Date)) +
 
 TSMC adjusts prices up and down according to demand and costs. It [raised prices](https://www.digitimes.com/news/a20210825PD209.html) by 10% in 2022, and is poised to [raise prices](https://bits-chips.com/article/tsmc-to-raise-advanced-process-prices-by-up-to-10-percent/) [again](https://www.trendforce.com/news/2025/09/05/news-tsmc-to-implement-a-significant-price-hike/) in 2026. For advanced nodes, TSMC is the primary global supplier and it therefore has significant pricing power. It has stated that its target is sustained gross margins [above 50%](https://investor.tsmc.com/chinese/encrypt/files/encrypt_file/reports/2025-07/1f4f86c935f1de837672a6973154e64b26bdae57/TSMC%202Q25%20Transcript.pdf).
 
-To account for broad price trends, we incorporate the Bureau of Labor Statistics' Producer Price Index by Industry.  Two potentially relevant series are [PCU33443344](https://fred.stlouisfed.org/series/PCU33443344) for "semiconductor and other electronic component manufacturing" and [PCU334413334413A](https://fred.stlouisfed.org/series/PCU334413334413A) for "other semiconductor devices, including transistors, diodes, and semiconductor parts such as wafers".  Both are plotted below, normalized to Q3 2022, the date of the article estimating ASP's above.  They show broadly similar trends, though the movements are larger for the more specific series ending in "13A".  
+As a proxy for broad price trends, we incorporate the Bureau of Labor Statistics' Producer Price Index by Industry.  Two potentially relevant series are [PCU33443344](https://fred.stlouisfed.org/series/PCU33443344) for "semiconductor and other electronic component manufacturing" and [PCU334413334413A](https://fred.stlouisfed.org/series/PCU334413334413A) for "other semiconductor devices, including transistors, diodes, and semiconductor parts such as wafers".  Both are plotted below, normalized to Q3 2022, the date of the article estimating ASPs above.  They show broadly similar trends, though the movements are larger for the more specific series ending in "13A".  Neither of these series directly reflect the market for finished wafers, but they provide a useful approximation for general industry price trends.
 
-For each time period deflate baseline prices estimated in the previous section report by the PPI, normalized so that 3Q22 has a deflator of 1.  This adjustment makes the total output estimated from revenues and ASP's better match the actual total output.
+For each time period, adjust baseline prices over time by changes in the PPI, normalized so that 3Q22 matches the anchor prices in the previous section.  This adjustment makes the total output estimated from revenues and ASPs better match the actual total output.
 
 
 ```{r}
@@ -199,9 +204,9 @@ ggplot( datify( est_total), aes( x=Date)) +
 
 ### Regression analysis
 
-As an additional sanity check for the ASP's, we perform a linear regression of total wafer production against revenues by node.  The regression coefficients should correspond to reciprocal ASP's.  Owing to large error bars, the results are a bit inconclusive, but for the advanced nodes it shows the ASP's used for this analysis aren't wildly off base.
+As an additional sanity check for the ASPs, we perform a linear regression of total wafer production against revenues by node adjusted by PPI.  The regression coefficients should correspond to reciprocal ASPs.  Since wafer revenues for the various nodes are strongly correlated with broad market trends, the regression struggles to identify which nodes should be associated with which revenue changes.  Thus, the results are a bit inconclusive and the coefficients are unstable and have large error bars.  However, for the advanced nodes it shows the ASPs used for this analysis aren't wildly off base.
 
-The black points are the ASP's used in this analysis, and the purple are the error bars estimated from regression.  Note however that some of the error bars for the reciprocal ASP's pass through zero, which implies the error range for the ASP's includes infinity. 
+The black points are the ASPs used in this analysis, and the purple are the error bars estimated from regression.  Note however that some of the error bars for the reciprocal ASPs pass through zero, which implies the error range for the ASPs includes infinity. 
 
 ```{r}
 #| echo: false
@@ -214,7 +219,7 @@ ggplot( ASP_regression, aes( x=Node )) +
 ```
 
 
-## Capacity Model: Scanner Supply Chain
+## Capacity Model: Scanner Delivery Tracking
 
 
 ```{r}
@@ -229,16 +234,24 @@ source( "scanners.R")
 
 In this section we discuss the first of two approaches for estimating the manufacturing capacity of TSMC.  In the first of two approaches, we track a critical input to semiconductor manufacturing, lithography scanners.
 
-There are a number of critical inputs to wafer production: unprocessed silicon wafers, electricity, water, specialized gasses and other components.  However, one of the rate-limiting tools for manufacturing is the scanner, which uses lasers to imprint the design of the semiconductor on the photoresist.  Modern nodes use extreme ultraviolet (EUV) scanners.  ASML is a dutch company which manufactures lithography scanners.  Importantly, is the only global supplier for the EUV lithography scanners used in advanced nodes.
+There are a number of critical inputs to wafer production: unprocessed silicon wafers, electricity, water, specialized gasses and other components.  However, one of the rate-limiting tools for manufacturing is the scanner, which uses lasers to imprint the design of the semiconductor on the photoresist.  Other manufacturing steps, such as etch, deposition, and yield ramp,  can also be the binding step especially as new nodes are coming online.  For tractability, we will focus on scanner capacity.  Modern nodes use extreme ultraviolet (EUV) scanners.  ASML is a dutch company which manufactures lithography scanners.  Importantly, is the only global supplier for the EUV lithography scanners used in advanced nodes.
 
 Scanners tracking is a convenient method for constraining capacity because scanners are discrete units relatively small in number.  They are very expensive equipment costing hundreds of millions of dollars, so one may expect that unlike wafers or gas, it's not economical to have a large number of stockpiled scanners which are unused.  Because ASML is the only global supplier, it is possible to estimate scanner sales by analyzing just one company.
+
+Note this model implicitly assumes that once scanners are delivered, they are productive in a short predictable window.  In reality there is a longer process of testing and ramp up before scanners are producing at maximum capacity.  Also this model abstracts away a lot of details about specific scanner installations in specific plants for specific workloads.  It assumes that scanner hours are essentially fungible.  In reality particular scanners are installed in specific locations as a part of a larger production tool chain and may be purposed in specialized ways which would limit overall capacity.  The model does not explicitly track fab-level constraints, customer-specific allocations, or short-term imbalances.
 
 
 ### Results
 
 Here are the results of the model. In subsequent sections we will discuss the methodologies and assumptions which comprise this approach.
 
-Primarily using ASML earnings reports, we estimate the specific scanner product lines sold to TSMC, and use published specs for each product line to estimate scanner throughput.  
+Primarily using ASML earnings reports, we estimate the specific scanner product lines sold to TSMC, and use published specs for each product line to estimate scanner throughput.  Here throughput refers to finished wafers per hour, accounting for multiple exposures (discussed later).
+
+Short outline of the methodology:
+
+1. Use reported ASML earnings breakdown to estimate scanner sales revenues from TSMC
+1. Use average sales price data to convert revenues to units by scanner product model
+1. From reported specs of scanner models and assumptions about exposure numbers and efficiency, estimate wafer capacity
 
 The maroon dots represent actual estimated production numbers from the previous section.  The purple line is the result of our model.  The grey line is the estimate of another industry analyst for reference and comparison.
 
@@ -264,7 +277,11 @@ In particular, ASML reports the total unit sales by technology type, and the tot
 
 Conceivably this analysis could also be extended to Samsung, which is the major producer of advanced chips in Korea, and whose fabs are all located in Korea.  Intel's global fab footprint is more complicated, but with additional assumptions this analysis could potentially be extended to that company as well.
 
+Note that ASML reports on scanner deliveries, whereas we would prefer to know when scanners are fully operational.  This analysis cannot track scanner retirement, or scanner install-base from before when the analysis begain.  
+
 Since we have a breakdown of both units and revenues by technology type (EUV, ArFi, etc.), we can infer the ASP of each technology type.  What we would like is the joint allocation of units between technology type and region.  However, we only only given the marginal allocation: revenues by region and revenues by product, so additional assumptions are needed.  
+
+
 
 ![wafer](images/asml_1q25.png)
 
@@ -306,7 +323,10 @@ datify(EUV_rev) |>
 
 ### ASP and Unit Allocation
 
-Rather than revenue allocation, we would like to know the allocation of scanner units.  As a simple assmption, we assume all regions have purchase scanners within the same technology category at the same ASP.  This is unrealistic, as its likely that early adopters of advanced nodes like TSMC will buy more expensive leading edge models within a category and have a higher ASP.  However, absent data to quantify differences between regions, we ignore this distinction.  
+Rather than revenue allocation, we would like to know the allocation of scanner units. 
+At this stage of the analysis, we are only focusing on EUV scanner counts, and ignoring differences in througput for different models.  We will refine the analysis in the next section.
+
+As a simple assmption, we assume all regions have purchase scanners within the same technology category at the same ASP.  This is unrealistic, as its likely that early adopters of advanced nodes like TSMC will buy more expensive leading edge models within a category and have a higher ASP.  However, absent data to quantify differences between regions, we ignore this distinction.  
 
 
 ```{r}
@@ -346,9 +366,11 @@ From industry reports and product specification pages, we make the following ass
 | EXE:5200B   | 50%  |     |    |     | 175 |[specs](https://www.asml.com/en/products/euv-lithography-systems/twinscan-exe-5200b)|
 :::
 
-The specs for each model include the throughput measured in "wafers per hour" (wph) at 100% utilization.  One important factor in the manufacturing of advanced nodes is the marked increase in the number of exposures required to manufacture a chip.  The manufacturing process may result in multiple physical layers or multiple exposures of related masks to allow for finer pitch.  In terms of throughput, we need an estimate for the typical number of exposures for a finished product, and industry shorthand which encompasses a number of different manufacturing processes is the number of "layers".
+The specs for each model include the throughput measured in "wafers per hour" (wph) at 100% utilization. ASML's wafer per hour numbers refer to a single exposure step, whereas finished wafers have multiple exposure and etch cycles.  In fact, the manufacturing of advanced nodes is the marked increase in the number of exposures required to manufacture a chip.  The manufacturing process may result in multiple physical layers or multiple exposures of related masks to allow for finer pitch.  In terms of throughput, we need an estimate for the typical number of exposures for a finished product, and industry shorthand which encompasses a number of different manufacturing processes is the number of "layers".  Sometimes a technical distinction is made between "layers" and "exposures".  For the purposes of this analysis, the number is just a factor for converting the wafer per hour throughput listed in the scanner spec to a rate of finished wafer throughput.  Finished wafer throughput is estimated by dividing the scanner’s exposure throughput by the average number of EUV exposures required per wafer.
 
-More advanced nodes have seen a big increase in the number layers.  The number of layers depends on the particular semiconductor being produced and is not universal to a node.  Logic semiconductors tend to require more layers than memory semiconductors.  Some sources distinguish manufacturing processes into finer categories, such as "N3" as compared with "N3E".  In any case, the trend toward increasing numbers of scans for advanced nodes is an important factor in manufacturing capacity, and we make some simplifying assumptions listed below.
+The number of layers depends on the particular semiconductor being produced and is not universal to a node.   Logic semiconductors tend to require more layers than memory semiconductors, and HPC / AI products have more layers than mobile phone SoC products.  Some sources distinguish manufacturing processes into finer categories, such as "N3" as compared with "N3E".  This analysis abstracts away these details, focusing on the average number of layers, but these considerations could be important for forcasting chip capacity for AI usage.  In any case, the trend toward increasing numbers of scans for advanced nodes is an important factor in manufacturing capacity, and we make some simplifying assumptions listed below.
+
+Here are the approximate number of layers by node, which are used as a modeling input.
 
 ::: {.center .small style="width: 60%;"}
 | Node | Layers | Source |
@@ -374,7 +396,7 @@ ASP_by_product |> datify() |> ggplot( aes( x=Date,y=ASP, color=`Technology`)) + 
 ```
 
 
-Below is an estimate of the ASP of particular scanner models. There are a lot of sources of uncertainty in these estimates.  First, public reports about scanner prices are sketchy and approximate and rarely mention specific models.  Almost certainly, product lines and their prices have changed over time.  As mentioned previously, ASP's for TSMC are likely higher than the overall reported ASP as they are early adopters of scanner technology.
+Below is an estimate of the ASP of particular scanner models. There are a lot of sources of uncertainty in these estimates.  First, public reports about scanner prices are sketchy and approximate and rarely mention specific models.  Almost certainly, product lines and their prices have changed over time.  As mentioned previously, ASPs for TSMC are likely higher than the overall reported ASP as they are early adopters of scanner technology.
 
 
 ::: {.center .small style="width: 60%;"}
@@ -414,6 +436,12 @@ source( "energy.R")
 ```
 
 In this section we describe a different approach to estimating TSMC production capacity.  In order to manufacture of advanced nodes, TSMC has constructed new fabrication plants.  The construction proceeds in phases, and an examination of satellite imagery suggests the design of the each phase is substantially similar.  From the observable elements of the construction, namely the cooling towers, we estimate the electrical power usage of the fab and hence the number of scanners it can support.  The progress of construction gives a time series of production capacity. 
+
+Short outline of the methodology:
+
+1. Use satellite imagery and industry reports to track construction at fabrication plants
+1. Use satellite imagery and industry reports to estimate power consumption 
+1. From estimates of energy usage of specific scanner models, estimate production capacity 
 
 
 ### Results
@@ -496,20 +524,38 @@ This could undoubtedly be refined, but as a starting point we will assume each p
 
 TSMC does not report exactly which scanners are used in each fab, though a [flythrough video](https://www.tomshardware.com/tech-industry/semiconductors/tsmc-gives-an-ultra-rare-video-look-inside-its-fabs-silver-highway-and-fab-tools-revealed-in-flyby-video-of-companys-us-arizona-fab-21) released by TSMC of the interior of Fab 21 shows what industry analysts idenfity as NXE:3600D's.  This is one of the machines previously associated with 5nm and 3nm production, so this is consistent with the reported production of 5nm semiconductors at Fab 21.
 
-EUV tools are the most energy intensive tool in the fab, but even so they consume only about 11% of the total energy according to [this report](https://www.tomshardware.com/tech-industry/each-euv-chipmaking-tool-consumes-as-much-power-as-a-small-city-euv-fabs-to-consume-54-000-gigawatts-by-2030-more-than-singapore) and [this report](https://www.eenewseurope.com/en/power-is-next-challenge-for-euv-lithography/).  Becuase of the large power consumption requirements for scanners, ASML and TSMC are  investing a lot of engineering research into reducing the power needs of scanners as described in [Thijssen et al. 2024](https://ieeexplore.ieee.org/document/10413888) and this [media report](https://www.tomshardware.com/tech-industry/semiconductors/tsmc-reduces-peak-power-consumption-of-euv-tools-by-44-percent-company-to-save-190-million-kilowatt-hours-of-electricity-by-2030).
+EUV tools are the most energy intensive tool in the fab, but even so they consume only about 11% of the total energy according to [this report](https://www.tomshardware.com/tech-industry/each-euv-chipmaking-tool-consumes-as-much-power-as-a-small-city-euv-fabs-to-consume-54-000-gigawatts-by-2030-more-than-singapore) and [this report](https://www.eenewseurope.com/en/power-is-next-challenge-for-euv-lithography/).  Becuase of the large power consumption requirements for scanners, ASML and TSMC are investing a lot of engineering research into reducing the power needs of scanners as described in [Thijssen et al. 2024](https://ieeexplore.ieee.org/document/10413888) and this [media report](https://www.tomshardware.com/tech-industry/semiconductors/tsmc-reduces-peak-power-consumption-of-euv-tools-by-44-percent-company-to-save-190-million-kilowatt-hours-of-electricity-by-2030).
 
-We refer to two sources for the power usage of particular scanner models.  The first is on page 68 [ASML's 2020 annual report](https://www.annualreports.com/HostedData/AnnualReportArchive/a/NASDAQ_ASML_2020.pdf) which suggests that at 100% untilization, the NXE:3400C consumes 1.31MW.  While we don't have exact figures for the NXE:3800D, [Jones 2023](https://ieeexplore.ieee.org/document/10413715) and media reports suggest its about the same accounting for increased complexity of more advanced manufacturing processes and increased efficiency of later models.  The actual energy usage depends on unknown variables such as the energy dose of each exposure and the number of steps in the manufacturing process.
+We refer to two sources for the power usage of particular scanner models.  The first is on page 68 [ASML's 2020 annual report](https://www.annualreports.com/HostedData/AnnualReportArchive/a/NASDAQ_ASML_2020.pdf) which suggests that at 100% untilization, the NXE:3400C consumes 1.31MW.  While we don't have exact figures for the NXE:3800D, but [Jones 2023](https://ieeexplore.ieee.org/document/10413715) and media reports suggest its about the same accounting for increased complexity of more advanced manufacturing processes and increased efficiency of later models.  
 
-Assuming each phase consumes 200MW of power, scanners account for 11% of that usage, and and each scanner consumes 80% x 1.31MW, the eight fab phases at TSMC Fab 18 support 167 scanners.  This is consistent with the analysis above from ASML earnings reports.  
+::: {.center style="width: 60%;"}
+
+![ASML 2020 Annual Report](images/ASML_energy_report.png)
+:::
+
+::: {.center .small style="width: 60%;"}
+
+![Excerpt from Jones 2023](images/Jones_energy_report.png)
+:::
+
+Assuming each phase consumes 200MW of power, scanners account for 11% of that usage, and and each scanner consumes 80% x 1.31MW, the eight fab phases at TSMC Fab 18 support 167 scanners.  This shows internal consistency across the two modeling approaches for the number of units.  The subsequent throughput analysis is rests on the same assumptions, so we should expect the results to be broadly consistent from this point.
 
 Using the time series of phase construction, we get the estimate of production capacity in the results section above.
 
 
 ## Conclusions
 
+In general, these methodologies in this report assume high utilization, mature throughput, and an averaged product mix.  Each of those assumptions biases the estimates up, so these capacity estimates are more like a practical upper bound than an estimate of the actual realizable output.
+
 In some ways analyzing the production capacity of TSMC is simpler than analyzing the capacity of its competitors.  TSMC is a pure fab: it's entire business is manufacturing chips for other companies.  While one of the business lines at Samsung and Intel is operating fabs, a substantial portion of their revenues come from semiconductors they design and market themselves.  Thus, the revenue reporting of TSMC maps relatively cleanly to production capacity of a commodity product.  Secondly, the scanner tracking analysis is facilitated by the fact that one of the reported geographic revenue categories from ASML is strongly associated with TSMC.  Many companies operating fabs in Europe and North America, and which makes attributing scanner sales to those geographic regions more difficult.  In the future as TSMC grows their manufacturing capacity in the United States, this analysis could become more difficult or less reliable. 
 
-Many aspects of this analysis could be refined or improved, especially with access to superior data sources.  However, the relative consistency of the results of the two methodologies is lends credence to the results of both approaches.
+Many aspects of this analysis could be refined or improved, especially with access to superior data sources.  Some of the major sources of uncertainty are:
 
+1. ASP dispersion across customers and product type and how AI devices might differ from "average" products
+1. Factors involved in scanner utilization, downtime, rescans, scanner installation ramp-up and other details of the actual production process.  This is handled by a single "utilization" factor which is very approximate.
+1. Exposure counts per wafer
+1. The specific scanner models utilized in specific fabs 
+
+The analysis for this project was coded by Ryan McCorvie in R.  The source code may be found in the \[[fabanalysis](https://github.com/mccorvie/fabanalysis)\] project on github.
 
 
