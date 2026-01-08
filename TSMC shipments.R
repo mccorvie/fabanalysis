@@ -57,7 +57,7 @@ bls_ppi <- bls_ppi |>
 # pivot_longer( bls_ppi, PCU334413334413A:PCU33443344, names_to = "Index", values_to = "Level") |>
 #   datify() |>
 #   ggplot( aes( x=Date, y=Level, color=Index, group=Index )) +geom_line(size=1)+scale_color_brewer(palette="Set2")+theme_minimal()
-
+113/11
 
 
 tsmc_wafer_production <- tsmc_revenue |> 
