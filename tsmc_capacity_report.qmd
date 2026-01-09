@@ -422,7 +422,7 @@ scanner_model_allocation |> pivot_longer( `EXE:5200B`:`NXE:3400C`, names_to = "P
 ```
 
 
-## Capacity Model: Energy and Construciton Analysis
+## Capacity Model: Energy and Construction Analysis
 ```{r}
 #| echo: false
 #| output: false
